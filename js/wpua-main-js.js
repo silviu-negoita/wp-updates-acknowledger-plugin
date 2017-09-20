@@ -1,32 +1,34 @@
-jQuery("#" + WPUAConstants.TABLE_ID).ready(
-  getDataFromServer(renderWidget)
-);
+jQuery(document).ready(function () {
+    jQuery("#" + WPUAConstants.WIDGET_BODY_ID).ready(
+    getDataFromServer(renderWidget)
+  );
+})
 
 function commitAckChange(dataToCommit) {
-  var articleId = document.getElementById(WPUAConstants.TABLE_ID).getAttribute(WPUAConstants.ARTICLE_PARAMETER_NAME)
+  var articleId = document.getElementById(WPUAConstants.WIDGET_BODY_ID).getAttribute(WPUAConstants.ARTICLE_PARAMETER_NAME)
   var param = {}
   param[WPUAConstants.ARTICLE_PARAMETER_NAME] = articleId
   param[WPUAConstants.ARTICLE_DATA_FIELD_VALUE] = dataToCommit
 
   jQuery.ajax({
     type: "POST",
-    url: "/wp/wp-json/wpua/api/savePreferences",
+    url: WPUAConstants.RELATIVE_SITE_URL + "/wp-json/wpua/api/savePreferences",
     dataType: "json",
     data: param
   });
 }
 
 function getDataFromServer(callback) {
-  var widgetBody = document.getElementById(WPUAConstants.TABLE_ID)
-  var articleId = document.getElementById(WPUAConstants.TABLE_ID).getAttribute(WPUAConstants.ARTICLE_PARAMETER_NAME)
-  var loggedUser = document.getElementById(WPUAConstants.TABLE_ID).getAttribute(WPUAConstants.LOGGED_USER_PARAMETER_NAME)
+  var widgetBody = document.getElementById(WPUAConstants.WIDGET_BODY_ID)
+  var articleId = document.getElementById(WPUAConstants.WIDGET_BODY_ID).getAttribute(WPUAConstants.ARTICLE_PARAMETER_NAME)
+  var loggedUser = document.getElementById(WPUAConstants.WIDGET_BODY_ID).getAttribute(WPUAConstants.LOGGED_USER_PARAMETER_NAME)
   var param = {};
   param[WPUAConstants.ARTICLE_PARAMETER_NAME] = articleId;
   param[WPUAConstants.LOGGED_USER_PARAMETER_NAME] = loggedUser;
 
   jQuery.ajax({
     type: "GET",
-    url: "/wp/wp-json/wpua/api/load_wpua_widget_data",
+    url: WPUAConstants.RELATIVE_SITE_URL + "/wp-json/wpua/api/load_wpua_widget_data",
     dataType: "json",
     data: param,
     success: callback
@@ -39,7 +41,7 @@ function getDataFromServer(callback) {
  */
 function renderWidget(data, responseCode) {
   // this is the root <table></table> where all columns/ros should be attached
-  var widgetBody = document.getElementById(WPUAConstants.TABLE_ID)
+  var widgetBody = document.getElementById(WPUAConstants.WIDGET_BODY_ID)
   if (widgetBody == undefined) {
     // this trigger from other place than an article page
     return

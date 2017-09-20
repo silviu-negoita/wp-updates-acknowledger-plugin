@@ -35,7 +35,7 @@ function register_constants($jsInit) {
   define(WPUA_WIDGET_TITLE, "Widget Title");
 
   // define common constants
-  define(TABLE_ID, "wpua_tableId");
+  define(WIDGET_BODY_ID, "wpua_tableId");
   define(ARTICLE_PARAMETER_NAME, "articleId");
   // value of custom_field which records all acks
   define(ARTICLE_DATA_FIELD_VALUE, "articleDataFieldValue");
@@ -43,20 +43,21 @@ function register_constants($jsInit) {
   define(REST_WIDGET_RESULT_DATA_RECORDED_STATISTICS_FIELD, "restWidgetResultDataRecordedStatisiticsField");
   define(REST_WIDGET_RESULT_DATA_ALL_ARTICLE_VERSIONS_FIELD, "restWidgetResultDataAllArticleVersionsField");
   define(LOGGED_USER_PARAMETER_NAME, "loggedUserParameterName");
+  define(RELATIVE_SITE_URL, get_site_url(null, null, 'relative'));
 
   // now link them to JS part. conisder to replace with a method
   if ($jsInit) {
 ?>
       <script>
           var WPUAConstants = {
-              TABLE_ID: "<?php echo TABLE_ID ?>",
+              WIDGET_BODY_ID: "<?php echo WIDGET_BODY_ID ?>",
               ARTICLE_PARAMETER_NAME: "<?php echo ARTICLE_PARAMETER_NAME ?>",
               ARTICLE_DATA_FIELD_VALUE : "<?php echo ARTICLE_DATA_FIELD_VALUE ?>",
               REST_WIDGET_RESULT_DATA_ALL_USERS_FIELD : "<?php echo REST_WIDGET_RESULT_DATA_ALL_USERS_FIELD ?>",
               REST_WIDGET_RESULT_DATA_RECORDED_ACKS_FIELD : "<?php echo REST_WIDGET_RESULT_DATA_RECORDED_ACKS_FIELD ?>",
               REST_WIDGET_RESULT_DATA_ALL_ARTICLE_VERSIONS_FIELD : "<?php echo REST_WIDGET_RESULT_DATA_ALL_ARTICLE_VERSIONS_FIELD ?>",
-              LOGGED_USER_PARAMETER_NAME : "<?php echo LOGGED_USER_PARAMETER_NAME ?>"
-
+              LOGGED_USER_PARAMETER_NAME : "<?php echo LOGGED_USER_PARAMETER_NAME ?>",
+              RELATIVE_SITE_URL : "<?php echo RELATIVE_SITE_URL ?>"
           }
       </script>
       <?php
@@ -205,7 +206,7 @@ class wp_my_plugin extends WP_Widget {
     
 ?>
         <div class="panel-heading"><?php echo $instance[title] ?></div>
-        <div id="<?php echo TABLE_ID ?>" <?php echo ARTICLE_PARAMETER_NAME ?> = "<?php echo get_the_ID() ?>" <?php echo LOGGED_USER_PARAMETER_NAME ?> = "<?php echo get_current_user_id() ?>" class="panel-body" style="overflow-x: auto;">
+        <div id="<?php echo WIDGET_BODY_ID ?>" <?php echo ARTICLE_PARAMETER_NAME ?> = "<?php echo get_the_ID() ?>" <?php echo LOGGED_USER_PARAMETER_NAME ?> = "<?php echo get_current_user_id() ?>" class="panel-body" style="overflow-x: auto;">
         </div>
         <?php
     echo $after_widget;
