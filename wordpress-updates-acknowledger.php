@@ -4,7 +4,7 @@
  * Description: Manage the article viewers per each version
  * Author: Silviu Negoita
  * Author URI: https://github.com/silviu-negoita
- * Version: 0.0.1
+ * Version: 0.0.2
  */
 
 /**
