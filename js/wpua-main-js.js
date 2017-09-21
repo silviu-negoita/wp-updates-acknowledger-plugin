@@ -70,7 +70,7 @@ function renderWidget(data, responseCode) {
 
 function createAckTable(allVersions, allUsers, recordedAcks) {
   tableElement = document.createElement("table")
-  jQuery(tableElement).addClass("table")
+  jQuery(tableElement).addClass("table table-condensed")
   jQuery(tableElement).addClass("wpua_table_no_margin")
 
   tableElement.appendChild(createTableHeader(allUsers.map(function(serverUser) {
@@ -277,6 +277,6 @@ function createWarningContent() {
   alert = document.createElement("div")
   jQuery(alert).addClass("alert alert-info")
   jQuery(alert).css('margin-bottom', '0px');
-  alert.innerHTML = "No versions found for this article. Use custom field <code>wpua_article_versions</code> to declare them. (e.g.<code>[[\"v1.1.0\", \"2017-15-23\"], ...]</code>)";
+  alert.innerHTML = "No versions found for this article. Use custom field <code>wpua_article_versions</code> to declare them. (e.g.<code>[[\"v1.1.0\", \"2017-09-23\"], ...]</code>)";
   return alert
 }
