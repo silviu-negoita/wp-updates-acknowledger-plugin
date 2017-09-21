@@ -26,13 +26,13 @@ function log_me($message) {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * Function called form both plugin and rest controller. When is called from plugin, it alose init cosntants to JS.
+ * Function called form both plugin and rest controller. When is called from plugin, it also init cosntants to JS. This represnts a messy workaround to init common constants between JS(client) and PHP(server).
  */
 function register_constants($jsInit) {
   // key to custom_field which records all acks
   define(WPUA_DATA_FIELD_KEY, "wpua_data_field");
   define(WPUA_ARTICLE_VERSIONS_KEY, "wpua_article_versions");
-  define(WPUA_WIDGET_TITLE, "Widget Title");
+  define(WPUA_WIDGET_TITLE, "Updates Ancknowledger");
 
   // define common constants
   define(WIDGET_BODY_ID, "wpua_tableId");
@@ -43,11 +43,11 @@ function register_constants($jsInit) {
   define(REST_WIDGET_RESULT_DATA_RECORDED_STATISTICS_FIELD, "restWidgetResultDataRecordedStatisiticsField");
   define(REST_WIDGET_RESULT_DATA_ALL_ARTICLE_VERSIONS_FIELD, "restWidgetResultDataAllArticleVersionsField");
   define(LOGGED_USER_PARAMETER_NAME, "loggedUserParameterName");
+  define(IS_ADMIN_LOGGED_USER, "isAdminLoggedParameterName");
   define(RELATIVE_SITE_URL, get_site_url(null, null, 'relative'));
-
   // now link them to JS part. conisder to replace with a method
   if ($jsInit) {
-?>
+?> 
       <script>
           var WPUAConstants = {
               WIDGET_BODY_ID: "<?php echo WIDGET_BODY_ID ?>",
@@ -57,6 +57,8 @@ function register_constants($jsInit) {
               REST_WIDGET_RESULT_DATA_RECORDED_ACKS_FIELD : "<?php echo REST_WIDGET_RESULT_DATA_RECORDED_ACKS_FIELD ?>",
               REST_WIDGET_RESULT_DATA_ALL_ARTICLE_VERSIONS_FIELD : "<?php echo REST_WIDGET_RESULT_DATA_ALL_ARTICLE_VERSIONS_FIELD ?>",
               LOGGED_USER_PARAMETER_NAME : "<?php echo LOGGED_USER_PARAMETER_NAME ?>",
+              LOGGED_USER : "<?php echo get_current_user_id() ?>",
+              IS_ADMIN_LOGGED_USER : "<?php echo current_user_can('administrator') ?>",
               RELATIVE_SITE_URL : "<?php echo RELATIVE_SITE_URL ?>"
           }
       </script>
@@ -73,7 +75,7 @@ function wpua_init() {
 
 add_action('wp_enqueue_scripts', 'wpua_init');
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CONTROLLER PART
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -85,7 +87,6 @@ function load_wpua_widget_data($request) {
   $article_id = $_GET[ARTICLE_PARAMETER_NAME];
   $logged_user = $_GET[LOGGED_USER_PARAMETER_NAME];
   $result = array();
-
   // set logged user first in result list
   $all_users_except_current = get_users(array(
     'fields' => array(
@@ -177,10 +178,10 @@ class wp_my_plugin extends WP_Widget {
     }
 ?>
 
-        <p>
-        <label for="<?php echo $this->get_field_id('title'); ?>"><?php _e(WPUA_WIDGET_TITLE, 'wp_widget_plugin'); ?></label>
-        <input class="widefat" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" type="text" value="<?php echo $title; ?>" />
-        </p>
+    <p>
+    <label for="<?php echo $this->get_field_id('title'); ?>"><?php _e(WPUA_WIDGET_TITLE, 'wp_widget_plugin'); ?></label>
+    <input class="widefat" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" type="text" value="<?php echo $title; ?>" />
+    </p>
         <?php
   }
 
@@ -208,12 +209,14 @@ class wp_my_plugin extends WP_Widget {
       'jquery'
     ));
     // Display the widget
-    
 ?>
     <div class="panel-heading"><?php echo $instance[title] ?></div>
-    <div id="<?php echo WIDGET_BODY_ID ?>" <?php echo ARTICLE_PARAMETER_NAME ?> = "<?php echo get_the_ID() ?>" <?php echo LOGGED_USER_PARAMETER_NAME ?> = "<?php echo get_current_user_id() ?>" class="panel-body" style="overflow-x: auto;">
+    <div  id="<?php echo WIDGET_BODY_ID ?>"
+      <?php echo ARTICLE_PARAMETER_NAME ?> = "<?php echo get_the_ID() ?>" 
+      class="panel-body" style="overflow-x: auto;" >
     </div>
         <?php
+
     echo $after_widget;
   }
 }

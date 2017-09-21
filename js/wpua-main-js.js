@@ -22,7 +22,7 @@ function commitAckChange(dataToCommit) {
 function getDataFromServer(callback) {
   var widgetBody = document.getElementById(WPUAConstants.WIDGET_BODY_ID)
   var articleId = document.getElementById(WPUAConstants.WIDGET_BODY_ID).getAttribute(WPUAConstants.ARTICLE_PARAMETER_NAME)
-  var loggedUser = document.getElementById(WPUAConstants.WIDGET_BODY_ID).getAttribute(WPUAConstants.LOGGED_USER_PARAMETER_NAME)
+  var loggedUser = WPUAConstants.LOGGED_USER
   var param = {};
   param[WPUAConstants.ARTICLE_PARAMETER_NAME] = articleId;
   param[WPUAConstants.LOGGED_USER_PARAMETER_NAME] = loggedUser;
@@ -37,6 +37,7 @@ function getDataFromServer(callback) {
 }
 
 /**
+ * Main entry render point.
  * Function which add columns and rows to root table element which stores the article-id; It makes a quey to server and load all
  * date wheich needs to render;
  */
@@ -66,6 +67,7 @@ function renderWidget(data, responseCode) {
 
 }
 
+
 function createAckTable(allVersions, allUsers, recordedAcks) {
   tableElement = document.createElement("table")
   jQuery(tableElement).addClass("table")
@@ -79,16 +81,15 @@ function createAckTable(allVersions, allUsers, recordedAcks) {
   var tbody = document.createElement("tbody")
   tableElement.appendChild(tbody)
 
+  // a versions look like ["v1.1.0", "2017-15-23"]. The first param is value, second is a small comment
   allVersions.forEach(function(version) {
     tr = createTableRow()
     // append first column cells (for Versions column)
-    td = document.createElement("td")
-    td.innerHTML = version
-    tr.appendChild(td)
+    tr.appendChild(createVersionCell(version))
     allUsers.map(function(serverUser) {
       return serverUser.ID
     }).forEach(function(user) {
-      tr.appendChild(createTableCell(version, user, recordedAcks))
+      tr.appendChild(createEditTableCell(version[0], user, recordedAcks))
     });
     tbody.appendChild(tr)
   });
@@ -96,7 +97,39 @@ function createAckTable(allVersions, allUsers, recordedAcks) {
   return tableElement
 }
 
+function createVersionCell(version) {
+  td = document.createElement("td")
+  td.innerHTML = version[0] + " <small>" + version[1] + "</small>"
+  return td
+}
 
+
+/**
+* Creates
+*/
+function createEditTableCell(version, user, data, ) {
+  td = document.createElement("td")
+  jQuery(td).addClass("wpua_center_table_cell")
+  button = document.createElement("button")
+
+  button.setAttribute("version", version);
+  button.setAttribute("user", user);
+
+  jQuery(button).addClass("btn-sm")
+  // disable button when current  logged user is not admin or is different from current render user cell
+  if (!(user == WPUAConstants.LOGGED_USER || WPUAConstants.IS_ADMIN_LOGGED_USER)) {
+    jQuery(button).addClass("disabled")
+  }
+  tableButtonClickEventHandler(button, data)
+
+  button.onclick = function() {
+    tableButtonClickEventHandler(this)
+  }
+
+  td.appendChild(button)
+
+  return td
+}
 
 function createTableRow() {
   return document.createElement("tr")
@@ -221,7 +254,6 @@ function changeTableButtonStyle(buttonElement, version, user, data) {
   }
 }
 
-
 function tableButtonClickEventHandler(buttonElement, recordedAcks) {
   version = buttonElement.getAttribute("version");
   user = buttonElement.getAttribute("user")
@@ -236,27 +268,6 @@ function tableButtonClickEventHandler(buttonElement, recordedAcks) {
     })
   }
 
-}
-
-function createTableCell(version, user, data) {
-  td = document.createElement("td")
-  jQuery(td).addClass("wpua_center_table_cell")
-  button = document.createElement("button")
-
-  button.setAttribute("version", version);
-  button.setAttribute("user", user);
-
-  jQuery(button).addClass("btn-sm")
-
-  tableButtonClickEventHandler(button, data)
-
-  button.onclick = function() {
-    tableButtonClickEventHandler(this)
-  }
-
-  td.appendChild(button)
-
-  return td
 }
 
 /**
