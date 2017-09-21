@@ -1,3 +1,4 @@
+
 jQuery(document).ready(function () {
     jQuery("#" + WPUAConstants.WIDGET_BODY_ID).ready(
     getDataFromServer(renderWidget)
@@ -46,6 +47,7 @@ function renderWidget(data, responseCode) {
     // this trigger from other place than an article page
     return
   }
+
   var articleId = widgetBody.getAttribute(WPUAConstants.ARTICLE_PARAMETER_NAME)
   var allUsers = data[WPUAConstants.REST_WIDGET_RESULT_DATA_ALL_USERS_FIELD]
   var allVersions = data[WPUAConstants.REST_WIDGET_RESULT_DATA_ALL_ARTICLE_VERSIONS_FIELD]
@@ -67,6 +69,7 @@ function renderWidget(data, responseCode) {
 function createAckTable(allVersions, allUsers, recordedAcks) {
   tableElement = document.createElement("table")
   jQuery(tableElement).addClass("table")
+  jQuery(tableElement).addClass("wpua_table_no_margin")
 
   tableElement.appendChild(createTableHeader(allUsers.map(function(serverUser) {
     return serverUser.display_name
@@ -237,6 +240,7 @@ function tableButtonClickEventHandler(buttonElement, recordedAcks) {
 
 function createTableCell(version, user, data) {
   td = document.createElement("td")
+  jQuery(td).addClass("wpua_center_table_cell")
   button = document.createElement("button")
 
   button.setAttribute("version", version);
@@ -262,6 +266,6 @@ function createWarningContent() {
   alert = document.createElement("div")
   jQuery(alert).addClass("alert alert-info")
   jQuery(alert).css('margin-bottom', '0px');
-  alert.innerHTML = "No versions found for this article. Use custom field 'wpua_article_versions' to declare them. (e.g. [\"v1.0.0\", \"v1.0.1\"])";
+  alert.innerHTML = "No versions found for this article. Use custom field <code>wpua_article_versions</code> to declare them. (e.g.<code>[[\"v1.1.0\", \"2017-15-23\"], ...]</code>)";
   return alert
 }

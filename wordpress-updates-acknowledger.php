@@ -67,11 +67,13 @@ function register_constants($jsInit) {
 function wpua_init() {
   // define PHP constants
   register_constants(true);
+  add_action( 'admin_notices', 'my_update_notice' );
+  log_me("init");
 }
 
 add_action('wp_enqueue_scripts', 'wpua_init');
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CONTROLLER PART
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -115,7 +117,7 @@ function load_wpua_widget_data($request) {
   }
   $result[REST_WIDGET_RESULT_DATA_RECORDED_ACKS_FIELD] = json_decode(get_post_meta($article_id, WPUA_DATA_FIELD_KEY, true));
   $all_versions = json_decode(get_post_meta($article_id, WPUA_ARTICLE_VERSIONS_KEY, true));
-  sort($all_versions);
+  rsort($all_versions);
   $result[REST_WIDGET_RESULT_DATA_ALL_ARTICLE_VERSIONS_FIELD] = $all_versions;
   return $result;
 }
@@ -198,6 +200,9 @@ class wp_my_plugin extends WP_Widget {
     echo $before_widget;
     // Load js deps
     $widget_js_dep = plugin_dir_url(__FILE__) . 'js/wpua-main-js.js';
+    $widget_css_dep = plugin_dir_url(__FILE__) . 'css/wpua_styles.css';
+    wp_enqueue_style( 'wpua-styles-css', $widget_css_dep);
+
     wp_register_script('wpua-main-js', $widget_js_dep);
     wp_enqueue_script('wpua-main-js', array(
       'jquery'
@@ -205,9 +210,9 @@ class wp_my_plugin extends WP_Widget {
     // Display the widget
     
 ?>
-        <div class="panel-heading"><?php echo $instance[title] ?></div>
-        <div id="<?php echo WIDGET_BODY_ID ?>" <?php echo ARTICLE_PARAMETER_NAME ?> = "<?php echo get_the_ID() ?>" <?php echo LOGGED_USER_PARAMETER_NAME ?> = "<?php echo get_current_user_id() ?>" class="panel-body" style="overflow-x: auto;">
-        </div>
+    <div class="panel-heading"><?php echo $instance[title] ?></div>
+    <div id="<?php echo WIDGET_BODY_ID ?>" <?php echo ARTICLE_PARAMETER_NAME ?> = "<?php echo get_the_ID() ?>" <?php echo LOGGED_USER_PARAMETER_NAME ?> = "<?php echo get_current_user_id() ?>" class="panel-body" style="overflow-x: auto;">
+    </div>
         <?php
     echo $after_widget;
   }
@@ -215,4 +220,28 @@ class wp_my_plugin extends WP_Widget {
 
 // register widget
 add_action('widgets_init', create_function('', 'return register_widget("wp_my_plugin");'));
+
+
+function isJson($string) {
+  json_decode($string);
+  return (json_last_error() == JSON_ERROR_NONE);
+}
+
+/*
+* Hook that validates that a field is a json
+*/
+function update_postmeta_hook($meta_id, $post_id, $meta_key, $meta_value) {
+  log_me("Add or Update metda event triggered on key ". $meta_key);
+  register_constants(false);
+  if ($meta_key == WPUA_DATA_FIELD_KEY || $meta_key == WPUA_ARTICLE_VERSIONS_KEY) {
+    if (!isJson($meta_value)) {
+      log_me("Is not json");
+      wp_die("Field '". $meta_key . "' is not a valid json. Please write it in a valid json format." , "Json Parse Exception");
+    } else {
+      log_me("Is json");
+    }
+  }
+}
+add_action( 'update_post_meta', 'update_postmeta_hook', 10, 4 );
+add_action( 'add_post_metadata', 'update_postmeta_hook', 10, 4 );
 
