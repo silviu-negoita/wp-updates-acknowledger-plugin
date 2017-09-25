@@ -1,10 +1,10 @@
 <?php
 /**
  * Plugin Name: Wordpress Updates Ancknowledger
- * Description: Manage the article viewers per each version
+ * Description: Manage the article viewers per each version; To render the 'Overview page', user shoud add an element with id = wpua_overview_page_container_id
  * Author: Silviu Negoita
  * Author URI: https://github.com/silviu-negoita
- * Version: 1.0.2
+ * Version: 1.0.3
  */
 
 include_once "wordpress-updates-acknowledger-overview-widget.php";
@@ -21,13 +21,12 @@ function register_constants($jsInit) {
   // key to custom_field which records all acks
   define(WPUA_DATA_FIELD_KEY, "wpua_data_field");
   define(WPUA_ARTICLE_VERSIONS_KEY, "wpua_article_versions");
-  define(WPUA_OVERVIEW_PAGE_KEY, "wpua_updates_acknowledger_overview_page");
   define(WPUA_WIDGET_TITLE, "Updates Ancknowledger");
 
   // define common constants
   define(WIDGET_BODY_ID, "wpua_tableId");
   define(ARTICLE_PARAMETER_NAME, "articleId");
-  define(WPUA_OVERVIEW_PAGE_ROOT_ELEMENT_ID, "wpua_overview_page_root_element_id");
+  define(WPUA_OVERVIEW_PAGE_CONTAINER_ID, "wpua_overview_page_container_id");
 
   // value of custom_field which records all acks
   define(ARTICLE_DATA_FIELD_VALUE, "articleDataFieldValue");
@@ -53,7 +52,7 @@ function register_constants($jsInit) {
               LOGGED_USER : "<?php echo get_current_user_id() ?>",
               IS_ADMIN_LOGGED_USER : "<?php echo current_user_can('administrator') ?>",
               RELATIVE_SITE_URL : "<?php echo RELATIVE_SITE_URL ?>",
-              WPUA_OVERVIEW_PAGE_ROOT_ELEMENT_ID : "<?php echo WPUA_OVERVIEW_PAGE_ROOT_ELEMENT_ID ?>",
+              WPUA_OVERVIEW_PAGE_CONTAINER_ID : "<?php echo WPUA_OVERVIEW_PAGE_CONTAINER_ID ?>",
               REST_OVERVIEW_PAGE_RESULT_CATEGORIES_FIELD : "<?php echo REST_OVERVIEW_PAGE_RESULT_CATEGORIES_FIELD ?>"
           }
       </script>
@@ -140,7 +139,6 @@ function savePreferences($request) {
   $date_field_value = json_encode($_POST[ARTICLE_DATA_FIELD_VALUE]);
   update_post_meta($article_id, WPUA_DATA_FIELD_KEY, $date_field_value);
 }
-
 
 /**
  * Register all rest routes(GET/POST)

@@ -1,17 +1,5 @@
 <?php
 
-function try_render_wpua_overview($content) {
-	//register_constants(true);
-		$overview_page_marker = get_post_meta(get_the_ID(), WPUA_OVERVIEW_PAGE_KEY, true);
-
-		if ($overview_page_marker == "on") {
-
-			// insert root element
-			$content = "<div class=\"table-responsive wpua_overview_container\" id=\"". WPUA_OVERVIEW_PAGE_ROOT_ELEMENT_ID ."\"/>";
-		}
-
-    return $content;
-}
 
 function get_parsed_categories() {
   $parsed_categories = array();
@@ -62,4 +50,3 @@ function getOverviewData($request) {
   return $result;
 }
 
-add_filter( 'the_content', 'try_render_wpua_overview');
