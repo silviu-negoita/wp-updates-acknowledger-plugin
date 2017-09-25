@@ -1,7 +1,7 @@
 
 jQuery(document).ready(function () {
     jQuery("#" + WPUAConstants.WIDGET_BODY_ID).ready(
-    getDataFromServer(renderWidget)
+      getDataFromServer(renderWidget)
   );
 })
 
@@ -21,7 +21,11 @@ function commitAckChange(dataToCommit) {
 
 function getDataFromServer(callback) {
   var widgetBody = document.getElementById(WPUAConstants.WIDGET_BODY_ID)
-  var articleId = document.getElementById(WPUAConstants.WIDGET_BODY_ID).getAttribute(WPUAConstants.ARTICLE_PARAMETER_NAME)
+  if(widgetBody == undefined) {
+    return
+  }
+
+  var articleId = widgetBody.getAttribute(WPUAConstants.ARTICLE_PARAMETER_NAME)
   var loggedUser = WPUAConstants.LOGGED_USER
   var param = {};
   param[WPUAConstants.ARTICLE_PARAMETER_NAME] = articleId;
@@ -135,18 +139,6 @@ function createTableRow() {
   return document.createElement("tr")
 }
 
-/*
-* Create the version column, from the left of the table
-*/
-function createTableVersionColumn(versions) {
-  tr = createTableRow();
-  versions.forEach(function(version) {
-    td = document.createElement("td")
-    td.innerHTML = version
-    tr.appendChild(td)
-  })
-  return tr
-}
 
 /**
 * Create the table header.

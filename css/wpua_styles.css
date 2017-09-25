@@ -5,3 +5,8 @@
 .wpua_table_no_margin {
 	margin-bottom: 0px;
 }
+
+.wpua_overview_container {
+	overflow: auto;
+	max-height: 600px;
+}

@@ -4,22 +4,11 @@
  * Description: Manage the article viewers per each version
  * Author: Silviu Negoita
  * Author URI: https://github.com/silviu-negoita
- * Version: 0.0.2
+ * Version: 1.0.1
  */
 
-/**
- * Method usefull to debug
- */
-function log_me($message) {
-  if (WP_DEBUG === true) {
-    if (is_array($message) || is_object($message)) {
-      error_log(print_r($message, true));
-    }
-    else {
-      error_log($message);
-    }
-  }
-}
+include_once "wordpress-updates-acknowledger-overview-widget.php";
+include_once "wpua-common-utils.php";
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // PLUGIN PART
@@ -32,16 +21,20 @@ function register_constants($jsInit) {
   // key to custom_field which records all acks
   define(WPUA_DATA_FIELD_KEY, "wpua_data_field");
   define(WPUA_ARTICLE_VERSIONS_KEY, "wpua_article_versions");
+  define(WPUA_OVERVIEW_PAGE_KEY, "wpua_updates_acknowledger_overview_page");
   define(WPUA_WIDGET_TITLE, "Updates Ancknowledger");
 
   // define common constants
   define(WIDGET_BODY_ID, "wpua_tableId");
   define(ARTICLE_PARAMETER_NAME, "articleId");
+  define(WPUA_OVERVIEW_PAGE_ROOT_ELEMENT_ID, "wpua_overview_page_root_element_id");
+
   // value of custom_field which records all acks
   define(ARTICLE_DATA_FIELD_VALUE, "articleDataFieldValue");
   define(REST_WIDGET_RESULT_DATA_ALL_USERS_FIELD, "restWidgetResultDataAllUsersField");
   define(REST_WIDGET_RESULT_DATA_RECORDED_STATISTICS_FIELD, "restWidgetResultDataRecordedStatisiticsField");
   define(REST_WIDGET_RESULT_DATA_ALL_ARTICLE_VERSIONS_FIELD, "restWidgetResultDataAllArticleVersionsField");
+  define(REST_OVERVIEW_PAGE_RESULT_CATEGORIES_FIELD, "restOverviewPageResultCategoriesField");
   define(LOGGED_USER_PARAMETER_NAME, "loggedUserParameterName");
   define(IS_ADMIN_LOGGED_USER, "isAdminLoggedParameterName");
   define(RELATIVE_SITE_URL, get_site_url(null, null, 'relative'));
@@ -59,18 +52,27 @@ function register_constants($jsInit) {
               LOGGED_USER_PARAMETER_NAME : "<?php echo LOGGED_USER_PARAMETER_NAME ?>",
               LOGGED_USER : "<?php echo get_current_user_id() ?>",
               IS_ADMIN_LOGGED_USER : "<?php echo current_user_can('administrator') ?>",
-              RELATIVE_SITE_URL : "<?php echo RELATIVE_SITE_URL ?>"
+              RELATIVE_SITE_URL : "<?php echo RELATIVE_SITE_URL ?>",
+              WPUA_OVERVIEW_PAGE_ROOT_ELEMENT_ID : "<?php echo WPUA_OVERVIEW_PAGE_ROOT_ELEMENT_ID ?>",
+              REST_OVERVIEW_PAGE_RESULT_CATEGORIES_FIELD : "<?php echo REST_OVERVIEW_PAGE_RESULT_CATEGORIES_FIELD ?>"
           }
       </script>
       <?php
   }
 }
 
+
 function wpua_init() {
   // define PHP constants
   register_constants(true);
-  add_action( 'admin_notices', 'my_update_notice' );
-  log_me("init");
+
+  // load all external deps
+  loadStyleDependency('wpua-styles-css',  'css/wpua_styles.css');
+  loadStyleDependency('wpua-font-awesome',  'css/font-awesome.css');
+
+  loadJsDependency('loadJsDependency', 'js/wpua-side-widget.js');
+  loadJsDependency('float-thead-js', 'js/float-thead.js');
+  loadJsDependency('wpua-overview-widget', 'js/wpua-overview-widget.js');
 }
 
 add_action('wp_enqueue_scripts', 'wpua_init');
@@ -87,7 +89,24 @@ function load_wpua_widget_data($request) {
   $article_id = $_GET[ARTICLE_PARAMETER_NAME];
   $logged_user = $_GET[LOGGED_USER_PARAMETER_NAME];
   $result = array();
-  // set logged user first in result list
+
+  $result[REST_WIDGET_RESULT_DATA_ALL_USERS_FIELD] = get_all_users_with_custom_first($_GET[LOGGED_USER_PARAMETER_NAME]);
+  $articleDataFieldValue = get_post_meta($article_id, WPUA_DATA_FIELD_KEY, true);
+  if (empty($articleDataFieldValue) || is_null($articleDataFieldValue)) {
+    update_post_meta($article_id, WPUA_DATA_FIELD_KEY, array());
+  }
+  $result[REST_WIDGET_RESULT_DATA_RECORDED_ACKS_FIELD] = json_decode(get_post_meta($article_id, WPUA_DATA_FIELD_KEY, true));
+  $all_versions = json_decode(get_post_meta($article_id, WPUA_ARTICLE_VERSIONS_KEY, true));
+  rsort($all_versions);
+  $result[REST_WIDGET_RESULT_DATA_ALL_ARTICLE_VERSIONS_FIELD] = $all_versions;
+  return $result;
+}
+
+/*
+* Get all system users, with first element current logged user.
+*/
+function get_all_users_with_custom_first($logged_user) {
+   // set logged user first in result list
   $all_users_except_current = get_users(array(
     'fields' => array(
       'display_name',
@@ -110,17 +129,7 @@ function load_wpua_widget_data($request) {
   array_splice($all_users, 0, 0, $current_users);
   array_splice($all_users, 1, 0, $all_users_except_current);
 
-  $result[REST_WIDGET_RESULT_DATA_ALL_USERS_FIELD] = $all_users;
-  $articleDataFieldValue = get_post_meta($article_id, WPUA_DATA_FIELD_KEY, true);
-  if (empty($articleDataFieldValue) || is_null($articleDataFieldValue)) {
-    update_post_meta($article_id, WPUA_DATA_FIELD_KEY, array());
-
-  }
-  $result[REST_WIDGET_RESULT_DATA_RECORDED_ACKS_FIELD] = json_decode(get_post_meta($article_id, WPUA_DATA_FIELD_KEY, true));
-  $all_versions = json_decode(get_post_meta($article_id, WPUA_ARTICLE_VERSIONS_KEY, true));
-  rsort($all_versions);
-  $result[REST_WIDGET_RESULT_DATA_ALL_ARTICLE_VERSIONS_FIELD] = $all_versions;
-  return $result;
+  return $all_users;
 }
 
 /**
@@ -131,6 +140,7 @@ function savePreferences($request) {
   $date_field_value = json_encode($_POST[ARTICLE_DATA_FIELD_VALUE]);
   update_post_meta($article_id, WPUA_DATA_FIELD_KEY, $date_field_value);
 }
+
 
 /**
  * Register all rest routes(GET/POST)
@@ -148,13 +158,19 @@ function register_api_routes() {
     'methods' => 'POST',
     'callback' => 'savePreferences',
   ));
+
+  register_rest_route('wpua/api/', '/getOverviewData', array(
+    'methods' => 'GET',
+    'callback' => 'getOverviewData',
+  ));
 }
 
 // register rest routes
 add_action('rest_api_init', "register_api_routes");
 
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// WIDGET PART
+// ARTICLE WIDGET PART
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -165,6 +181,8 @@ class wp_my_plugin extends WP_Widget {
   // constructor
   function wp_my_plugin() {
     parent::WP_Widget(false, $name = __('Update Ancknowledger Widget', 'wp_widget_plugin'));
+
+
   }
 
   // widget form creation
@@ -193,21 +211,16 @@ class wp_my_plugin extends WP_Widget {
     return $instance;
   }
 
+  function loadAllExternalDependencies() {
+
+  }
+
   // widget display
   function widget($args, $instance) {
-    extract($args);
+    //extract($args);
     // these are the widget options
     $title = apply_filters('widget_title', $instance['title']);
-    echo $before_widget;
-    // Load js deps
-    $widget_js_dep = plugin_dir_url(__FILE__) . 'js/wpua-main-js.js';
-    $widget_css_dep = plugin_dir_url(__FILE__) . 'css/wpua_styles.css';
-    wp_enqueue_style( 'wpua-styles-css', $widget_css_dep);
-
-    wp_register_script('wpua-main-js', $widget_js_dep);
-    wp_enqueue_script('wpua-main-js', array(
-      'jquery'
-    ));
+    echo $args['before_widget'];
     // Display the widget
 ?>
     <div class="panel-heading"><?php echo $instance[title] ?></div>
@@ -217,18 +230,16 @@ class wp_my_plugin extends WP_Widget {
     </div>
         <?php
 
-    echo $after_widget;
+    echo $args['after_widget'];
   }
 }
 
 // register widget
 add_action('widgets_init', create_function('', 'return register_widget("wp_my_plugin");'));
 
-
-function isJson($string) {
-  json_decode($string);
-  return (json_last_error() == JSON_ERROR_NONE);
-}
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//CUSTOM FIELDS  VALIDATOR PART
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /*
 * Hook that validates that a field is a json
