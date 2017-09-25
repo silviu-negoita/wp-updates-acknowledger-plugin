@@ -65,7 +65,7 @@ function creatOverviewTable(data) {
     tbody.appendChild(createOverviewTableCategoryRow(category, all_users))
     if (category.hasOwnProperty('articles')) {
       category['articles'].forEach((article) => {
-        tbody.appendChild(createOverviewTableArticleRow(article, all_users, category['nesting_level']))
+        tbody.appendChild(createOverviewTableArticleRow(article, all_users, category['nesting_level'] + 1))
       })
     }  
   })
@@ -79,6 +79,7 @@ function createOverviewTableCategoryRow(category, all_users) {
   
   // create first column
   tr.appendChild(createOverviewTableCategoryCell(category['name'], nesting_level))
+  jQuery(tr).attr("level", nesting_level)
   // now append empty columns
   for (var i = 0; i < all_users.length + 1; i++) {
     tr.appendChild(document.createElement("td"));
@@ -97,6 +98,8 @@ function createOverviewTableCategoryCell(category_name, nesting_level) {
 
   icon = document.createElement("i")
   jQuery(icon).addClass("fa fa-folder-open-o ")
+  jQuery(icon).click(onCategoryIconClickEventHandler)
+  jQuery(icon).css("cursor", "pointer")
   wrapper.appendChild(icon)
 
 
@@ -107,11 +110,46 @@ function createOverviewTableCategoryCell(category_name, nesting_level) {
   return td
 }
 
-function createOverviewTableArticleRow(article, all_users, root_category_indentation) {
+function onCategoryIconClickEventHandler(event) {
+  let parentTr = jQuery(event.srcElement).closest("tr")[0]
+  let allNextSiblingsWithLowerLevel = []
+  let next = jQuery(parentTr).next("tr")[0]
+
+  while(next != undefined && jQuery(next).attr('level') > jQuery(parentTr).attr('level')) {
+    allNextSiblingsWithLowerLevel.push(next)
+    next = jQuery(next).next("tr")[0]
+  }
+
+  if (jQuery(event.srcElement).hasClass('fa-folder-open-o')) {
+    // needs collapse
+    jQuery(event.srcElement).removeClass('fa-folder-open-o')
+    jQuery(event.srcElement).addClass('fa-folder-o')
+    allNextSiblingsWithLowerLevel.forEach((sibling) => {
+      jQuery(sibling).css("display", "none")
+    })
+  } else {
+    // needs to expand
+    jQuery(event.srcElement).removeClass('fa-folder-o')
+    jQuery(event.srcElement).addClass('fa-folder-open-o')
+    allNextSiblingsWithLowerLevel.forEach((sibling) => {
+      jQuery(sibling).css("display", "table-row")
+      // but also check if categories already collapsed. if it is collapsed, expand it too
+      let icons = jQuery(sibling).find("i")
+      if (icons.length > 0) {
+        jQuery(icons[0]).removeClass('fa-folder-o')
+        jQuery(icons[0]).addClass('fa-folder-open-o')
+      }
+    })
+  }
+
+}
+
+
+function createOverviewTableArticleRow(article, all_users, nesting_level) {
   let tr = document.createElement("tr")
-  
+  jQuery(tr).attr("level", nesting_level)
   // frst column, with article name
-  tr.appendChild(createOverviewTableArticleNameCell(article, root_category_indentation))
+  tr.appendChild(createOverviewTableArticleNameCell(article, nesting_level))
 
   let last_version = undefined
 
@@ -152,10 +190,11 @@ function createVersionLabel(version, clazz) {
 */
 function createOverviewTableUserColumn(recorded_acks, user, last_version) {
   let td = undefined
+  let bigger_version = undefined
+
   if (last_version == undefined) {
     return document.createElement('td')
-  } else {
-    bigger_version = undefined
+  } else if (recorded_acks != undefined ) {
     recorded_acks.forEach((recorded_ack) => {
       if (jQuery.inArray(user['ID'], recorded_ack['ackUsers']) > -1) {
         // we found a version for this user
@@ -179,20 +218,19 @@ function createOverviewTableUserColumn(recorded_acks, user, last_version) {
   return td
 }
 
-
-function createOverviewTableArticleNameCell(article, root_category_indentation) {
+function createOverviewTableArticleNameCell(article, nesting_level) {
   let td = document.createElement("td")
   jQuery(td).css('color', 'royalblue');
 
   wrapper = document.createElement("div")
   jQuery(wrapper).css('width', '400px');
-  jQuery(wrapper).css('margin-left', ((root_category_indentation + 1)* 10) + 'px');
+  jQuery(wrapper).css('margin-left', ((nesting_level)* 10) + 'px');
   td.appendChild(wrapper);
 
   // create the first column, with article name
   icon = document.createElement("i")
   jQuery(icon).addClass("fa fa-level-up fa-rotate-90")
- 
+
   wrapper.appendChild(icon)
 
   article_anchor = document.createElement("a")
