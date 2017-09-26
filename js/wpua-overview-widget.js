@@ -1,6 +1,5 @@
 jQuery(document).ready(() => {
   jQuery("#" + WPUAConstants.WPUA_OVERVIEW_PAGE_CONTAINER_ID).ready(() => {
-    jQuery("#" + WPUAConstants.WPUA_OVERVIEW_PAGE_CONTAINER_ID).addClass("table-responsive wpua_overview_container")
     getOverviewData(renderOverviewContent)
   });
 })
@@ -25,12 +24,30 @@ function getOverviewData(callback) {
  */
 function renderOverviewContent(result) {
   let rootElement = jQuery("#" + WPUAConstants.WPUA_OVERVIEW_PAGE_CONTAINER_ID).get(0)
-
+  
   if (rootElement == undefined) {
     return
   }
+  // attach collapse/expand buttons
+
+  let expand = document.createElement("button")
+  jQuery(expand).addClass("btn btn-sm btn-warning")
+  expand.innerHTML = "<i class=\"fa fa-minus\"/> Expand all articles"
+  jQuery(expand).click(onExpandAllArticleClickEventHandler)
+  rootElement.appendChild(expand)
+
+  let collapse = document.createElement("button")
+  jQuery(collapse).addClass("btn btn-sm btn-primary")
+  jQuery(collapse).click(onCollapseToCategoriesArticleClickEventHandler)
+  collapse.innerHTML = "<i class=\"fa fa-plus\"/>  Collapse to categories"
+  rootElement.appendChild(collapse)
+
+
   // attach the table
-  rootElement.appendChild(creatOverviewTable(result));
+  var table_wrapper = document.createElement("div")
+  jQuery(table_wrapper).addClass("table-responsive wpua_overview_container")
+  table_wrapper.appendChild(creatOverviewTable(result));
+  rootElement.appendChild(table_wrapper)
 
   // now remove the sidebar and make the content wider
   jQuery("#primary").removeClass("col-md-8")
@@ -40,7 +57,7 @@ function renderOverviewContent(result) {
   // activate fixed header on table
   jQuery("#wpua-table-element").floatThead({
     scrollContainer: ($table) => {
-      return jQuery("#" + WPUAConstants.WPUA_OVERVIEW_PAGE_CONTAINER_ID)
+      return jQuery(table_wrapper)
     }
   });
 }
@@ -74,7 +91,9 @@ function creatOverviewTable(data) {
 function createOverviewTableCategoryRow(category, all_users) {
   let nesting_level = category['nesting_level']
   let tr = document.createElement("tr")
-
+  jQuery(tr).attr("category_id", category['cat_ID'])
+  jQuery(tr).attr("category_parent", category['category_parent'])
+  jQuery(tr).addClass("is-category")
   // create first column
   tr.appendChild(createOverviewTableCategoryCell(category['name'], nesting_level))
   jQuery(tr).attr("level", nesting_level)
@@ -113,44 +132,81 @@ function createOverviewTableCategoryCell(category_name, nesting_level) {
  * This is a click handler for category icon. This represents the entry point for tree logic
  */
 function onCategoryIconClickEventHandler(event) {
-  let parentTr = jQuery(event.target).closest("tr")[0]
-  let allNextSiblingsWithLowerLevel = []
-  let next = jQuery(parentTr).next("tr")[0]
+  let category_row_element = jQuery(event.target).closest("tr")[0]
+  
+  icon = jQuery(category_row_element).find("i")[0]
+  if (jQuery(icon).hasClass('fa-folder-open-o')) {
+    collapse_or_expand_category(category_row_element, true)
+  } else {
+    collapse_or_expand_category(category_row_element, false)
+  }
+}
 
-  while (next != undefined && jQuery(next).attr('level') > jQuery(parentTr).attr('level')) {
+function onExpandAllArticleClickEventHandler(event) {
+  all_categories = jQuery("#wpua-table-element").find(".is-category[level=0]")
+  all_categories.get().forEach((category) => {
+      collapse_or_expand_category(category, false)
+  })
+} 
+
+function onCollapseToCategoriesArticleClickEventHandler(event) {
+  all_categories = jQuery("#wpua-table-element").find(".is-category[level=0]")
+  all_categories.get().forEach((category) => {
+     collapseToCategories(category)
+  })
+
+}
+
+function collapseToCategories(category) {
+  let category_articles = jQuery('#wpua-table-element').find(".is-article[category_parent=" + jQuery(category).attr("category_id") + "]")
+  if (category_articles.length >  0) {
+    // no articles, so collapse
+    collapse_or_expand_category(category, true)
+    return
+  } 
+
+  let subcategories = jQuery('#wpua-table-element').find(".is-category[category_parent=" + jQuery(category).attr("category_id") + "]")
+  subcategories.get().forEach((subcategory) => {
+    collapseToCategories(subcategory)
+  })
+}
+
+
+function collapse_or_expand_category(category_row_element, collapse) {
+  let allNextSiblingsWithLowerLevel = []
+  let next = jQuery(category_row_element).next("tr")[0]
+  while (next != undefined && jQuery(next).attr('level') > jQuery(category_row_element).attr('level')) {
     allNextSiblingsWithLowerLevel.push(next)
     next = jQuery(next).next("tr")[0]
   }
-
-  icon = jQuery(parentTr).find("i")[0]
-  if (jQuery(icon).hasClass('fa-folder-open-o')) {
-    // needs collapse
-    jQuery(icon).removeClass('fa-folder-open-o')
-    jQuery(icon).addClass('fa-folder-o')
-    allNextSiblingsWithLowerLevel.forEach((sibling) => {
-      jQuery(sibling).fadeOut(200)
-    })
-  } else {
-    // needs to expand
-    jQuery(icon).removeClass('fa-folder-o')
-    jQuery(icon).addClass('fa-folder-open-o')
-    allNextSiblingsWithLowerLevel.forEach((sibling) => {
-      jQuery(sibling).fadeIn(200)
-      // but also check if categories already collapsed. if it is collapsed, expand it too
-      let icons = jQuery(sibling).find("i")
-      if (icons.length > 0) {
-        jQuery(icons[0]).removeClass('fa-folder-o')
-        jQuery(icons[0]).addClass('fa-folder-open-o')
+  icon = jQuery(category_row_element).find("i")[0]
+  allNextSiblingsWithLowerLevel.forEach((sibling) => {
+      if (collapse) {
+        jQuery(icon).removeClass('fa-folder-open-o')
+        jQuery(icon).addClass('fa-folder-o')
+        jQuery(sibling).fadeOut(200)
+      } else {
+        // needs to expand
+        jQuery(icon).removeClass('fa-folder-o')
+        jQuery(icon).addClass('fa-folder-open-o')
+        jQuery(sibling).fadeIn(200)
+        // but also check if categories already collapsed. if it is collapsed, expand it too
+        let icons = jQuery(sibling).find("i")
+        if (icons.length > 0) {
+          jQuery(icons[0]).removeClass('fa-folder-o')
+          jQuery(icons[0]).addClass('fa-folder-open-o')
+        }
       }
-    })
-  }
-
+  })
 }
+
 
 
 function createOverviewTableArticleRow(article, all_users, nesting_level) {
   let tr = document.createElement("tr")
   jQuery(tr).attr("level", nesting_level)
+  jQuery(tr).addClass("is-article")
+  jQuery(tr).attr("category_parent", article['category_parent'])
   // frst column, with article name
   tr.appendChild(createOverviewTableArticleNameCell(article, nesting_level))
 

@@ -1,6 +1,8 @@
 <?php
 
 
+
+
 function get_parsed_categories() {
   $parsed_categories = array();
 	foreach( get_categories('hide_empty=1') as $cat ) :
@@ -29,6 +31,7 @@ function process_cat_tree( $cat , $nesting_level,  &$parsed_categories) {
   		rsort($all_versions);
 			
 			$post->all_versions = $all_versions;
+			$post->category_parent = $cat->cat_ID;
 		endforeach;
 		$cat->articles = $cat_posts;
 	endif;
@@ -36,9 +39,10 @@ function process_cat_tree( $cat , $nesting_level,  &$parsed_categories) {
 	$next = get_categories('hide_empty=1&parent=' . $cat->term_id);
 
 	if( $next ) :
-		foreach( $next as $cat ) :
+		foreach( $next as $next_cat ) :
 			$nesting_level++;
-			process_cat_tree( $cat , $nesting_level, $parsed_categories);
+			$next_cat->category_parent = $cat->term_id;
+			process_cat_tree( $next_cat , $nesting_level, $parsed_categories);
 		endforeach;
 	endif;
 }
