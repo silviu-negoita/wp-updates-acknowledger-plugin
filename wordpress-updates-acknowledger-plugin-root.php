@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Wordpress Updates Ancknowledger
- * Description: Manage the article viewers per each version; To render the 'Overview page', user shoud add an element with id = wpua_overview_page_container_id. This plugin aggregate an existing plugin called "Js Dom Customizer"
+ * Description: Manage the article viewers per each version; To render the 'Overview page', user shoud add an element with id = wpua_overview_page_container_id. This plugin aggregates an existing plugin called "Js Dom Customizer"
  * Author: Silviu Negoita, Anca Barbu
  * Author URI: https://github.com/silviu-negoita
  * Version: 2.0.1
@@ -20,25 +20,30 @@ include_once "wordpress-dom-customizer.php";
  * Function called form both plugin and rest controller. When is called from plugin, it also init cosntants to JS. This represnts a messy workaround to init common constants between JS(client) and PHP(server).
  */
 function register_constants($jsInit) {
-  // key to custom_field which records all acks
-  define(WPUA_DATA_FIELD_KEY, "wpua_data_field");
-  define(WPUA_ARTICLE_VERSIONS_KEY, "wpua_article_versions");
-  define(WPUA_WIDGET_TITLE, "Updates Ancknowledger");
+  if (!defined(WPUA_CONTANTS_REGISTERED)) {
+    define(WPUA_CONTANTS_REGISTERED, true);
+     // key to custom_field which records all acks
+    define(WPUA_DATA_FIELD_KEY, "wpua_data_field");
+    define(WPUA_ARTICLE_VERSIONS_KEY, "wpua_article_versions");
+    define(WPUA_WIDGET_TITLE, "Updates Ancknowledger");
 
-  // define common constants
-  define(WIDGET_BODY_ID, "wpua_tableId");
-  define(ARTICLE_PARAMETER_NAME, "articleId");
-  define(WPUA_OVERVIEW_PAGE_CONTAINER_ID, "wpua_overview_page_container_id");
+    // define common constants
+    define(WIDGET_BODY_ID, "wpua_tableId");
+    define(ARTICLE_PARAMETER_NAME, "articleId");
+    define(WPUA_OVERVIEW_PAGE_CONTAINER_ID, "wpua_overview_page_container_id");
 
-  // value of custom_field which records all acks
-  define(ARTICLE_DATA_FIELD_VALUE, "articleDataFieldValue");
-  define(REST_WIDGET_RESULT_DATA_ALL_USERS_FIELD, "restWidgetResultDataAllUsersField");
-  define(REST_WIDGET_RESULT_DATA_RECORDED_STATISTICS_FIELD, "restWidgetResultDataRecordedStatisiticsField");
-  define(REST_WIDGET_RESULT_DATA_ALL_ARTICLE_VERSIONS_FIELD, "restWidgetResultDataAllArticleVersionsField");
-  define(REST_OVERVIEW_PAGE_RESULT_CATEGORIES_FIELD, "restOverviewPageResultCategoriesField");
-  define(LOGGED_USER_PARAMETER_NAME, "loggedUserParameterName");
-  define(IS_ADMIN_LOGGED_USER, "isAdminLoggedParameterName");
-  define(RELATIVE_SITE_URL, get_site_url(null, null, 'relative'));
+    // value of custom_field which records all acks
+    define(ARTICLE_DATA_FIELD_VALUE, "articleDataFieldValue");
+    define(REST_WIDGET_RESULT_DATA_ALL_USERS_FIELD, "restWidgetResultDataAllUsersField");
+    define(REST_WIDGET_RESULT_DATA_RECORDED_STATISTICS_FIELD, "restWidgetResultDataRecordedStatisiticsField");
+    define(REST_WIDGET_RESULT_DATA_ALL_ARTICLE_VERSIONS_FIELD, "restWidgetResultDataAllArticleVersionsField");
+    define(REST_OVERVIEW_PAGE_RESULT_CATEGORIES_FIELD, "restOverviewPageResultCategoriesField");
+    define(LOGGED_USER_PARAMETER_NAME, "loggedUserParameterName");
+    define(IS_ADMIN_LOGGED_USER, "isAdminLoggedParameterName");
+    define(RELATIVE_SITE_URL, get_site_url(null, null, 'relative'));
+  }
+
+ 
   // now link them to JS part. conisder to replace with a method
   if ($jsInit) {
 ?> 

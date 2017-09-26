@@ -6,17 +6,9 @@ jQuery(document).ready(function () {
 })
 
 function commitAckChange(dataToCommit) {
-  var articleId = document.getElementById(WPUAConstants.WIDGET_BODY_ID).getAttribute(WPUAConstants.ARTICLE_PARAMETER_NAME)
-  var param = {}
-  param[WPUAConstants.ARTICLE_PARAMETER_NAME] = articleId
-  param[WPUAConstants.ARTICLE_DATA_FIELD_VALUE] = dataToCommit
-
-  jQuery.ajax({
-    type: "POST",
-    url: WPUAConstants.RELATIVE_SITE_URL + "/wp-json/wpua/api/savePreferences",
-    dataType: "json",
-    data: param
-  });
+  var params = {}
+  params[WPUAConstants.ARTICLE_DATA_FIELD_VALUE] = dataToCommit
+  makeServerRequest("POST", "/wp-json/wpua/api/savePreferences", params)
 }
 
 /*

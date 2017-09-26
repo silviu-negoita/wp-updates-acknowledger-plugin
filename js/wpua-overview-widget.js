@@ -6,16 +6,7 @@ jQuery(document).ready(() => {
 
 
 function getOverviewData(callback) {
-  let param = {}
-  param[WPUAConstants.LOGGED_USER_PARAMETER_NAME] = WPUAConstants.LOGGED_USER
-
-  jQuery.ajax({
-    type: "GET",
-    url: WPUAConstants.RELATIVE_SITE_URL + "/wp-json/wpua/api/getOverviewData",
-    dataType: "json",
-    data: param,
-    success: callback
-  });
+  makeServerRequest("GET", "/wp-json/wpua/api/getOverviewData", {}, callback)
 }
 
 /*
