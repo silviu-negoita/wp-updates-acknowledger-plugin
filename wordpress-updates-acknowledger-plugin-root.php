@@ -8,7 +8,7 @@
  */
 
 include_once "wordpress-updates-acknowledger-overview-widget.php";
-include_once "wpua-common-utils.php";
+include_once "wordpress-updates-acknowledger-common-utils.php";
 // load old 'Js Dom Customizer' plugin
 include_once "wordpress-dom-customizer.php";
 
