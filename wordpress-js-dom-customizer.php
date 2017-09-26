@@ -37,4 +37,14 @@ function insert_in_header() {
 	'</script>';
 }
 add_action('wp_head', 'insert_in_header');
+
+/**
+*	wp-json/wpua/api/get_all_registered_users
+*/
+function get_article_versions() {
+	$article_id = $_GET[ARTICLE_PARAMETER_NAME];
+	$result = array();
+	$result[REST_WIDGET_RESULT_DATA_ALL_ARTICLE_VERSIONS_FIELD] = get_article_versions_internal($article_id);
+	return $result;
+}
 ?>

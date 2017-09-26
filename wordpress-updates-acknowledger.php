@@ -81,6 +81,11 @@ add_action('wp_enqueue_scripts', 'wpua_init');
 // CONTROLLER PART
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+function get_article_versions_internal($article_id) {
+  $all_versions = json_decode(get_post_meta($article_id, WPUA_ARTICLE_VERSIONS_KEY, true));
+  rsort($all_versions);
+  return $all_versions;
+}
 /**
  * Method called from JS to get data to render for article widget. It returns a data structure with following fields:
  *
@@ -96,9 +101,7 @@ function load_wpua_widget_data($request) {
     update_post_meta($article_id, WPUA_DATA_FIELD_KEY, array());
   }
   $result[REST_WIDGET_RESULT_DATA_RECORDED_ACKS_FIELD] = json_decode(get_post_meta($article_id, WPUA_DATA_FIELD_KEY, true));
-  $all_versions = json_decode(get_post_meta($article_id, WPUA_ARTICLE_VERSIONS_KEY, true));
-  rsort($all_versions);
-  $result[REST_WIDGET_RESULT_DATA_ALL_ARTICLE_VERSIONS_FIELD] = $all_versions;
+  $result[REST_WIDGET_RESULT_DATA_ALL_ARTICLE_VERSIONS_FIELD] = get_article_versions_internal($article_id);
   return $result;
 }
 
@@ -161,6 +164,11 @@ function register_api_routes() {
   register_rest_route('wpua/api/', '/getOverviewData', array(
     'methods' => 'GET',
     'callback' => 'getOverviewData',
+  ));
+
+  register_rest_route('wpua/api/', '/getArticleVersions', array(
+    'methods' => 'GET',
+    'callback' => 'get_article_versions',
   ));
 }
 
