@@ -5,7 +5,7 @@
    Note: This plugin aggregates an existing plugin called "Js Dom Customizer"
  * Author: Silviu Negoita, Anca Barbu
  * Author URI: https://github.com/silviu-negoita
- * Version: 2.1.0
+ * Version: 2.1.1
  */
 
 include_once "wordpress-updates-acknowledger-overview-content.php";
@@ -223,10 +223,6 @@ class wp_my_plugin extends WP_Widget {
     // Fields
     $instance['title'] = strip_tags($new_instance['title']);
     return $instance;
-  }
-
-  function loadAllExternalDependencies() {
-
   }
 
   // widget display
