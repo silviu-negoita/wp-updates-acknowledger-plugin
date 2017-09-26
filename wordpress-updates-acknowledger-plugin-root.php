@@ -1,13 +1,14 @@
 <?php
 /**
  * Plugin Name: Wordpress Updates Ancknowledger
- * Description: Manage the article viewers per each version; To render the 'Overview page', user shoud add an element with id = wpua_overview_page_container_id. This plugin aggregates an existing plugin called "Js Dom Customizer"
+ * Description: Manage the article viewers per each version; To render the 'Overview page', user shoud add an element with id = wpua_overview_page_container_id. 
+   Note: This plugin aggregates an existing plugin called "Js Dom Customizer"
  * Author: Silviu Negoita, Anca Barbu
  * Author URI: https://github.com/silviu-negoita
- * Version: 2.0.1
+ * Version: 2.1.0
  */
 
-include_once "wordpress-updates-acknowledger-overview-widget.php";
+include_once "wordpress-updates-acknowledger-overview-content.php";
 include_once "wordpress-updates-acknowledger-common-utils.php";
 // load old 'Js Dom Customizer' plugin
 include_once "wordpress-dom-customizer.php";
@@ -43,7 +44,6 @@ function register_constants($jsInit) {
     define(RELATIVE_SITE_URL, get_site_url(null, null, 'relative'));
   }
 
- 
   // now link them to JS part. conisder to replace with a method
   if ($jsInit) {
 ?> 
@@ -78,7 +78,8 @@ function wpua_init() {
 
   loadJsDependency('loadJsDependency', 'js/wpua-side-widget.js');
   loadJsDependency('float-thead-js', 'js/float-thead.js');
-  loadJsDependency('wpua-overview-widget', 'js/wpua-overview-widget.js');
+  loadJsDependency('wpua-overview-widget', 'js/wpua-overview-content.js');
+  loadJsDependency('wpua-common', 'js/wpua-common.js');
 }
 
 add_action('wp_enqueue_scripts', 'wpua_init');

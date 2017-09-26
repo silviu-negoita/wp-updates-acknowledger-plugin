@@ -1,34 +1,34 @@
 jQuery(document).ready(() => {
   jQuery("#" + WPUAConstants.WPUA_OVERVIEW_PAGE_CONTAINER_ID).ready(() => {
-    getOverviewData(renderOverviewContent)
+    get_overview_data(render_overview_content)
   });
 })
 
 
-function getOverviewData(callback) {
-  makeServerRequest("GET", "/wp-json/wpua/api/getOverviewData", {}, callback)
+function get_overview_data(callback) {
+  make_server_request("GET", "/wp-json/wpua/api/getOverviewData", {}, callback)
 }
 
 /*
  * Entry point for rendering UA Overview Page content.
  */
-function renderOverviewContent(result) {
+function render_overview_content(result) {
   let rootElement = jQuery("#" + WPUAConstants.WPUA_OVERVIEW_PAGE_CONTAINER_ID).get(0)
   
   if (rootElement == undefined) {
     return
   }
-  // attach collapse/expand buttons
 
+  // attach collapse/expand buttons
   let expand = document.createElement("button")
   jQuery(expand).addClass("btn btn-sm btn-warning")
   expand.innerHTML = "<i class=\"fa fa-minus\"/> Expand all articles"
-  jQuery(expand).click(onExpandAllArticleClickEventHandler)
+  jQuery(expand).click(on_expand_all_articles_click_event_handler)
   rootElement.appendChild(expand)
 
   let collapse = document.createElement("button")
   jQuery(collapse).addClass("btn btn-sm btn-primary")
-  jQuery(collapse).click(onCollapseToCategoriesArticleClickEventHandler)
+  jQuery(collapse).click(on_collapse_to_categoriesArticleClickEventHandler)
   collapse.innerHTML = "<i class=\"fa fa-plus\"/>  Collapse to categories"
   rootElement.appendChild(collapse)
 
@@ -36,7 +36,7 @@ function renderOverviewContent(result) {
   // attach the table
   var table_wrapper = document.createElement("div")
   jQuery(table_wrapper).addClass("table-responsive wpua_overview_container")
-  table_wrapper.appendChild(creatOverviewTable(result));
+  table_wrapper.appendChild(create_overview_table(result));
   rootElement.appendChild(table_wrapper)
 
   // now remove the sidebar and make the content wider
@@ -52,25 +52,26 @@ function renderOverviewContent(result) {
   });
 }
 
-function creatOverviewTable(data) {
+function create_overview_table(data) {
   let categories_and_articles = data[WPUAConstants.REST_OVERVIEW_PAGE_RESULT_CATEGORIES_FIELD]
   let all_users = data[WPUAConstants.REST_WIDGET_RESULT_DATA_ALL_USERS_FIELD]
   tableElement = document.createElement("table");
   jQuery(tableElement).attr("id", "wpua-table-element")
   jQuery(tableElement).addClass("table table-hover")
 
-
   // append table header
-  tableElement.appendChild(createOverviewTableHeader(all_users))
+  tableElement.appendChild(create_overview_table_header(all_users))
   // append table content
   let tbody = document.createElement("tbody")
   tableElement.appendChild(tbody)
 
   categories_and_articles.forEach((category) => {
-    tbody.appendChild(createOverviewTableCategoryRow(category, all_users))
+    // apeend the category row
+    tbody.appendChild(create_overview_table_category_row(category, all_users))
     if (category.hasOwnProperty('articles')) {
+      // append articles for this category
       category['articles'].forEach((article) => {
-        tbody.appendChild(createOverviewTableArticleRow(article, all_users, category['nesting_level'] + 1))
+        tbody.appendChild(create_overview_table_article_row(article, all_users, category['nesting_level'] + 1))
       })
     }
   })
@@ -78,14 +79,15 @@ function creatOverviewTable(data) {
   return tableElement;
 }
 
-function createOverviewTableCategoryRow(category, all_users) {
+function create_overview_table_category_row(category, all_users) {
   let nesting_level = category['nesting_level']
   let tr = document.createElement("tr")
   jQuery(tr).attr("category_id", category['cat_ID'])
   jQuery(tr).attr("category_parent", category['category_parent'])
   jQuery(tr).addClass("is-category")
+  
   // create first column
-  tr.appendChild(createOverviewTableCategoryCell(category['name'], nesting_level))
+  tr.appendChild(create_overview_table_category_cell(category['name'], nesting_level))
   jQuery(tr).attr("level", nesting_level)
   // now append empty columns
   for (var i = 0; i < all_users.length + 1; i++) {
@@ -94,18 +96,18 @@ function createOverviewTableCategoryRow(category, all_users) {
   return tr
 }
 
-function createOverviewTableCategoryCell(category_name, nesting_level) {
+function create_overview_table_category_cell(category_name, nesting_level) {
   let td = document.createElement("td")
-  wrapper = document.createElement("div")
+  let wrapper = document.createElement("div")
   jQuery(wrapper).css('margin-left', (nesting_level * 10) + 'px');
   jQuery(wrapper).css('width', '400px');
 
-  jQuery(wrapper).click(onCategoryIconClickEventHandler)
+  jQuery(wrapper).click(on_category_icon_click_event_handler)
   jQuery(wrapper).css("cursor", "pointer")
 
   td.appendChild(wrapper);
 
-  icon = document.createElement("i")
+  let icon = document.createElement("i")
   jQuery(icon).addClass("fa fa-folder-open-o ")
   
   wrapper.appendChild(icon)
@@ -121,7 +123,7 @@ function createOverviewTableCategoryCell(category_name, nesting_level) {
 /*
  * This is a click handler for category icon. This represents the entry point for tree logic
  */
-function onCategoryIconClickEventHandler(event) {
+function on_category_icon_click_event_handler(event) {
   let category_row_element = jQuery(event.target).closest("tr")[0]
   
   icon = jQuery(category_row_element).find("i")[0]
@@ -132,22 +134,22 @@ function onCategoryIconClickEventHandler(event) {
   }
 }
 
-function onExpandAllArticleClickEventHandler(event) {
+function on_expand_all_articles_click_event_handler(event) {
   all_categories = jQuery("#wpua-table-element").find(".is-category[level=0]")
   all_categories.get().forEach((category) => {
       collapse_or_expand_category(category, false)
   })
 } 
 
-function onCollapseToCategoriesArticleClickEventHandler(event) {
+function on_collapse_to_categoriesArticleClickEventHandler(event) {
   all_categories = jQuery("#wpua-table-element").find(".is-category[level=0]")
   all_categories.get().forEach((category) => {
-     collapseToCategories(category)
+     collapse_to_categories(category)
   })
 
 }
 
-function collapseToCategories(category) {
+function collapse_to_categories(category) {
   let category_articles = jQuery('#wpua-table-element').find(".is-article[category_parent=" + jQuery(category).attr("category_id") + "]")
   if (category_articles.length >  0) {
     // no articles, so collapse
@@ -157,7 +159,7 @@ function collapseToCategories(category) {
 
   let subcategories = jQuery('#wpua-table-element').find(".is-category[category_parent=" + jQuery(category).attr("category_id") + "]")
   subcategories.get().forEach((subcategory) => {
-    collapseToCategories(subcategory)
+    collapse_to_categories(subcategory)
   })
 }
 
@@ -190,36 +192,34 @@ function collapse_or_expand_category(category_row_element, collapse) {
   })
 }
 
-
-
-function createOverviewTableArticleRow(article, all_users, nesting_level) {
+function create_overview_table_article_row(article, all_users, nesting_level) {
   let tr = document.createElement("tr")
   jQuery(tr).attr("level", nesting_level)
   jQuery(tr).addClass("is-article")
   jQuery(tr).attr("category_parent", article['category_parent'])
-  // frst column, with article name
-  tr.appendChild(createOverviewTableArticleNameCell(article, nesting_level))
+  // first column, with article name
+  tr.appendChild(create_overview_table_article_name_cell(article, nesting_level))
 
   let last_version = undefined
 
   // second column, with last version
   if (article['all_versions'] != undefined) {
     last_version = article['all_versions'][0]
-    tr.appendChild(createVersionLabel(last_version[0], "label-success"))
+    tr.appendChild(create_version_label(last_version[0], "label-success"))
   } else {
     td = document.createElement("td")
     td.innerHTML = "N/A"
-    tr.appendChild(createVersionLabel("N/A", "label-warning"))
+    tr.appendChild(create_version_label("N/A", "label-warning"))
   }
 
   all_users.forEach((user) => {
-    tr.appendChild(createOverviewTableUserColumnCell(article['wpua_recorded_acks'], user, last_version));
+    tr.appendChild(create_overview_table_user_column_cell(article['wpua_recorded_acks'], user, last_version));
   })
 
   return tr
 }
 
-function createVersionLabel(version, clazz) {
+function create_version_label(version, clazz) {
   td = document.createElement('td')
   jQuery(td).css("text-align", "center")
 
@@ -237,7 +237,7 @@ function createVersionLabel(version, clazz) {
 /**
  * 
  */
-function createOverviewTableUserColumnCell(recorded_acks, user, last_version) {
+function create_overview_table_user_column_cell(recorded_acks, user, last_version) {
   let td = undefined
   let bigger_version = undefined
 
@@ -256,18 +256,18 @@ function createOverviewTableUserColumnCell(recorded_acks, user, last_version) {
 
   if (bigger_version != undefined) {
     if (bigger_version != last_version[0]) {
-      td = createVersionLabel(bigger_version, "label-danger")
+      td = create_version_label(bigger_version, "label-danger")
     } else {
-      td = createVersionLabel(bigger_version, "label-success")
+      td = create_version_label(bigger_version, "label-success")
     }
   } else {
-    td = createVersionLabel("None", "label-danger")
+    td = create_version_label("None", "label-danger")
   }
 
   return td
 }
 
-function createOverviewTableArticleNameCell(article, nesting_level) {
+function create_overview_table_article_name_cell(article, nesting_level) {
   let td = document.createElement("td")
   jQuery(td).css('color', 'royalblue');
 
@@ -288,7 +288,7 @@ function createOverviewTableArticleNameCell(article, nesting_level) {
   return td
 }
 
-function createOverviewTableHeader(all_users) {
+function create_overview_table_header(all_users) {
   let thead = document.createElement("thead")
   let tr = document.createElement("tr")
 

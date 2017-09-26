@@ -1,10 +1,7 @@
 <?php
 /**
 * Wordpress JS DOM Customizer
-* 
-* Anca Barbu
-* https://github.com/henkelb
-* 1.1.7
+* Author: Anca Barbu
 */
 
 function wp_customizer_scripts_basic()
@@ -13,14 +10,13 @@ function wp_customizer_scripts_basic()
 	// the scripts shouldn't be enqueued for a page
 	if (is_singular('post') ) {	 
 		// Register the scripts atfer jQuery dep
-		wp_register_script('customizer_script', plugins_url('js/wpdc-customizer.js', __FILE__ ), array( 'jquery' ));
-		wp_enqueue_script('customizer_script');	
+		loadJsDependency('wpdc-customizer', 'js/wpdc-customizer.js');
 	}
 }
 add_action('wp_enqueue_scripts', 'wp_customizer_scripts_basic' );
 
 function wp_customizer() {
-    include('wordpress-customizer-import-admin.php');
+    include('wordpress-dom-customizer-import-admin.php');
 }
 
 function wp_customizer_admin_actions() {

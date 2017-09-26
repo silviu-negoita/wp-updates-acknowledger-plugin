@@ -1,44 +1,18 @@
 
 jQuery(document).ready(function () {
     jQuery("#" + WPUAConstants.WIDGET_BODY_ID).ready(
-      getDataFromServer(renderWidget)
+      get_data_from_server(render_widget)
   );
 })
 
-function commitAckChange(dataToCommit) {
+function commit_ack_change(dataToCommit) {
   var params = {}
   params[WPUAConstants.ARTICLE_DATA_FIELD_VALUE] = dataToCommit
-  makeServerRequest("POST", "/wp-json/wpua/api/savePreferences", params)
+  make_server_request("POST", "/wp-json/wpua/api/savePreferences", params)
 }
 
-/*
-* Generic method to make requests to server. Kepp in mind that this method populates in params article_id or logged_user if exists in wpua context.
-*/
-function makeServerRequest(request_type, request_uri, params, callback) {
-  var widgetBody = document.getElementById(WPUAConstants.WIDGET_BODY_ID)
-  if(widgetBody == undefined) {
-    return
-  }
-
-  var articleId = widgetBody.getAttribute(WPUAConstants.ARTICLE_PARAMETER_NAME)
-  var loggedUser = WPUAConstants.LOGGED_USER
-  if (params == undefined) {
-    params = {}
-  }
-  params[WPUAConstants.ARTICLE_PARAMETER_NAME] = articleId;
-  params[WPUAConstants.LOGGED_USER_PARAMETER_NAME] = loggedUser;
-
-  jQuery.ajax({
-    type: request_type,
-    url: WPUAConstants.RELATIVE_SITE_URL + request_uri,
-    dataType: "json",
-    data: params,
-    success: callback
-  });
-}
-
-function getDataFromServer(callback) {
-  makeServerRequest("GET",  "/wp-json/wpua/api/load_wpua_widget_data", {}, callback);
+function get_data_from_server(callback) {
+  make_server_request("GET",  "/wp-json/wpua/api/load_wpua_widget_data", {}, callback);
 }
 
 /**
@@ -46,7 +20,7 @@ function getDataFromServer(callback) {
  * Function which add columns and rows to root table element which stores the article-id; It makes a quey to server and load all
  * date wheich needs to render;
  */
-function renderWidget(data, responseCode) {
+function render_widget(data, responseCode) {
   // this is the root <table></table> where all columns/ros should be attached
   var widgetBody = document.getElementById(WPUAConstants.WIDGET_BODY_ID)
   if (widgetBody == undefined) {
@@ -65,20 +39,20 @@ function renderWidget(data, responseCode) {
   }
 
   if (allVersions == undefined) {
-    widgetBody.appendChild(createWarningContent())
+    widgetBody.appendChild(create_warning_content())
   } else {
-    widgetBody.appendChild(createAckTable(allVersions, allUsers, recordedAcks))
+    widgetBody.appendChild(create_ack_table(allVersions, allUsers, recordedAcks))
   }
 
 }
 
 
-function createAckTable(allVersions, allUsers, recordedAcks) {
+function create_ack_table(allVersions, allUsers, recordedAcks) {
   tableElement = document.createElement("table")
   jQuery(tableElement).addClass("table table-condensed")
   jQuery(tableElement).addClass("wpua_table_no_margin")
 
-  tableElement.appendChild(createTableHeader(allUsers.map(function(serverUser) {
+  tableElement.appendChild(create_table_header(allUsers.map(function(serverUser) {
     return serverUser.display_name
   })))
 
@@ -88,13 +62,13 @@ function createAckTable(allVersions, allUsers, recordedAcks) {
 
   // a versions look like ["v1.1.0", "2017-15-23"]. The first param is value, second is a small comment
   allVersions.forEach(function(version) {
-    tr = createTableRow()
+    tr = create_table_row()
     // append first column cells (for Versions column)
-    tr.appendChild(createVersionCell(version))
+    tr.appendChild(create_version_cell(version))
     allUsers.map(function(serverUser) {
       return serverUser.ID
     }).forEach(function(user) {
-      tr.appendChild(createEditTableCell(version[0], user, recordedAcks))
+      tr.appendChild(create_edit_table_cell(version[0], user, recordedAcks))
     });
     tbody.appendChild(tr)
   });
@@ -102,7 +76,8 @@ function createAckTable(allVersions, allUsers, recordedAcks) {
   return tableElement
 }
 
-function createVersionCell(version) {
+function create_version_cell(version) {
+  //TODO Anca here should be created anchors from js dom customizer
   td = document.createElement("td")
   td.innerHTML = version[0] + " <small>" + version[1] + "</small>"
   return td
@@ -112,7 +87,7 @@ function createVersionCell(version) {
 /**
 * Creates
 */
-function createEditTableCell(version, user, data, ) {
+function create_edit_table_cell(version, user, data, ) {
   td = document.createElement("td")
   jQuery(td).addClass("wpua_center_table_cell")
   button = document.createElement("button")
@@ -125,10 +100,10 @@ function createEditTableCell(version, user, data, ) {
   if (!(user == WPUAConstants.LOGGED_USER || WPUAConstants.IS_ADMIN_LOGGED_USER)) {
     jQuery(button).addClass("disabled")
   }
-  tableButtonClickEventHandler(button, data)
+  table_button_click_event_handler(button, data)
 
   button.onclick = function() {
-    tableButtonClickEventHandler(this)
+    table_button_click_event_handler(this)
   }
 
   td.appendChild(button)
@@ -136,15 +111,14 @@ function createEditTableCell(version, user, data, ) {
   return td
 }
 
-function createTableRow() {
+function create_table_row() {
   return document.createElement("tr")
 }
-
 
 /**
 * Create the table header.
 */
-function createTableHeader(users) {
+function create_table_header(users) {
   var thead = document.createElement("thead");
   var versionsHead = document.createElement("th");
   versionsHead.innerHTML = "Versions";
@@ -161,7 +135,7 @@ function createTableHeader(users) {
 * Function that add or remove a user from given version. It also commit the change to server.
 * recordedAcks is like : [{"version" : "v1.0.2", "ackUsers" : ["1"] }, {"version" : "v1.0.1", "ackUsers" : ["1", "2"]}]
 */ 
-function toggleAckUserInData(version, user, recordedAcks) {
+function toggle_ack_user_in_data(version, user, recordedAcks) {
   var versionDataEntry;
   var foundIndex = -1
   if (recordedAcks != null) {
@@ -204,7 +178,7 @@ function toggleAckUserInData(version, user, recordedAcks) {
     versionDataEntry.ackUsers.push(user)
   }
 
-  commitAckChange(recordedAcks)
+  commit_ack_change(recordedAcks)
   return recordedAcks
 }
 
@@ -212,7 +186,7 @@ function toggleAckUserInData(version, user, recordedAcks) {
 * Method which scan recoredAcks and return true if an user is found in certain version as ack
 * recordedAcks is like : [{"version" : "v1.0.2", "ackUsers" : ["1"] }, {"version" : "v1.0.1", "ackUsers" : ["1", "2"]}]
 */
-function extractAckToggleValueFromData(version, user, recordedAcks) {
+function extract_ack_toggle_value_from_data(version, user, recordedAcks) {
   // data entry is like : {"version" : "v1.0.2", "ackUsers" : ["1"] }
   var found = false;
   if (recordedAcks != undefined) {
@@ -235,8 +209,8 @@ function extractAckToggleValueFromData(version, user, recordedAcks) {
   return found
 }
 
-function changeTableButtonStyle(buttonElement, version, user, data) {
-  if (!extractAckToggleValueFromData(version, user, data)) {
+function change_table_button_style(buttonElement, version, user, data) {
+  if (!extract_ack_toggle_value_from_data(version, user, data)) {
     jQuery(buttonElement).text('Not read');
     jQuery(buttonElement).addClass("btn-danger")
     jQuery(buttonElement).removeClass("btn-success")
@@ -247,17 +221,17 @@ function changeTableButtonStyle(buttonElement, version, user, data) {
   }
 }
 
-function tableButtonClickEventHandler(buttonElement, recordedAcks) {
+function table_button_click_event_handler(buttonElement, recordedAcks) {
   version = buttonElement.getAttribute("version");
   user = buttonElement.getAttribute("user")
 
   if (recordedAcks != undefined) {
-    changeTableButtonStyle(buttonElement, version, user, recordedAcks)
+    change_table_button_style(buttonElement, version, user, recordedAcks)
   } else {
     // if no recordedAcks were provided, then query get them from server
-    getDataFromServer(function(data) {
-      var recordedAcks = toggleAckUserInData(version, user, data[WPUAConstants.REST_WIDGET_RESULT_DATA_RECORDED_ACKS_FIELD])
-      changeTableButtonStyle(buttonElement, version, user, recordedAcks)
+    get_data_from_server(function(data) {
+      var recordedAcks = toggle_ack_user_in_data(version, user, data[WPUAConstants.REST_WIDGET_RESULT_DATA_RECORDED_ACKS_FIELD])
+      change_table_button_style(buttonElement, version, user, recordedAcks)
     })
   }
 
@@ -266,7 +240,7 @@ function tableButtonClickEventHandler(buttonElement, recordedAcks) {
 /**
  * Create an alert which is shown when no versions are present in article
  */
-function createWarningContent() {
+function create_warning_content() {
   alert = document.createElement("div")
   jQuery(alert).addClass("alert alert-info")
   jQuery(alert).css('margin-bottom', '0px');
