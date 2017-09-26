@@ -20,7 +20,7 @@ function wp_customizer_scripts_basic()
 add_action('wp_enqueue_scripts', 'wp_customizer_scripts_basic' );
 
 function wp_customizer() {
-    include('wp_customizer_import_admin.php');
+    include('wordpress-customizer-import-admin.php');
 }
 
 function wp_customizer_admin_actions() {
@@ -39,12 +39,12 @@ function insert_in_header() {
 add_action('wp_head', 'insert_in_header');
 
 /**
-*	wp-json/wpua/api/get_all_registered_users
+*	wp-json/wpua/api/getArticleVersions
 */
 function get_article_versions() {
 	$article_id = $_GET[ARTICLE_PARAMETER_NAME];
 	$result = array();
-	$result[REST_WIDGET_RESULT_DATA_ALL_ARTICLE_VERSIONS_FIELD] = get_article_versions_internal($article_id);
+	$result[REST_WIDGET_RESULT_DATA_ALL_ARTICLE_VERSIONS_FIELD] = get_article_versions_internal(4);
 	return $result;
 }
 ?>

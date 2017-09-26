@@ -1,15 +1,16 @@
 <?php
 /**
  * Plugin Name: Wordpress Updates Ancknowledger
- * Description: Manage the article viewers per each version; To render the 'Overview page', user shoud add an element with id = wpua_overview_page_container_id
- * Author: Silviu Negoita
+ * Description: Manage the article viewers per each version; To render the 'Overview page', user shoud add an element with id = wpua_overview_page_container_id. This plugin aggregate an existing plugin called "Js Dom Customizer"
+ * Author: Silviu Negoita, Anca Barbu
  * Author URI: https://github.com/silviu-negoita
- * Version: 1.0.3
+ * Version: 2.0.1
  */
 
 include_once "wordpress-updates-acknowledger-overview-widget.php";
 include_once "wpua-common-utils.php";
-include_once "wordpress-js-dom-customizer.php";
+// load old 'Js Dom Customizer' plugin
+include_once "wordpress-dom-customizer.php";
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // PLUGIN PART
