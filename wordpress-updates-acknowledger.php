@@ -9,6 +9,7 @@
 
 include_once "wordpress-updates-acknowledger-overview-widget.php";
 include_once "wpua-common-utils.php";
+include_once "wordpress-js-dom-customizer.php";
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // PLUGIN PART

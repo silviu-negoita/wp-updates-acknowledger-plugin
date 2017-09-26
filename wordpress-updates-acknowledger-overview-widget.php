@@ -1,8 +1,5 @@
 <?php
 
-
-
-
 function get_parsed_categories() {
   $parsed_categories = array();
 	foreach( get_categories('hide_empty=1') as $cat ) :
