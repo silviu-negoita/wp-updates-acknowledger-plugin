@@ -16,7 +16,6 @@ function getOverviewData(callback) {
     data: param,
     success: callback
   });
-
 }
 
 /*
