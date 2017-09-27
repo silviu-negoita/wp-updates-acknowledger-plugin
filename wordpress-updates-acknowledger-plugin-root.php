@@ -8,8 +8,8 @@
  * Version: 2.1.1
  */
 
-include_once "wordpress-updates-acknowledger-overview-content.php";
 include_once "wordpress-updates-acknowledger-common-utils.php";
+include_once "wordpress-updates-acknowledger-overview-content.php";
 // load old 'Js Dom Customizer' plugin
 include_once "wordpress-dom-customizer.php";
 
@@ -76,10 +76,10 @@ function wpua_init() {
   loadStyleDependency('wpua-styles-css',  'css/wpua_styles.css');
   loadStyleDependency('wpua-font-awesome',  'css/font-awesome.css');
 
+  loadJsDependency('wpua-common', 'js/wpua-common.js');
   loadJsDependency('loadJsDependency', 'js/wpua-side-widget.js');
   loadJsDependency('float-thead-js', 'js/float-thead.js');
   loadJsDependency('wpua-overview-widget', 'js/wpua-overview-content.js');
-  loadJsDependency('wpua-common', 'js/wpua-common.js');
 }
 
 add_action('wp_enqueue_scripts', 'wpua_init');
