@@ -14,7 +14,6 @@ function get_parsed_categories() {
 
 function process_cat_tree( $cat , $nesting_level,  &$parsed_categories) {
  	$cat->nesting_level = $nesting_level;
- 	// array_push($parsed_categories, $cat);
  	$parsed_categories[] = $cat;
 	$args = array('category__in' => array( $cat->term_id ), 'numberposts' => -1);
 	$cat_posts = get_posts( $args );
@@ -22,7 +21,7 @@ function process_cat_tree( $cat , $nesting_level,  &$parsed_categories) {
 	if( $cat_posts ) :
 		foreach( $cat_posts as $post ) :
 			$post->permalink = get_permalink( $post->ID );
-			$post->wpua_recorded_acks = json_decode(get_post_meta($post->ID, WPUA_DATA_FIELD_KEY, true));
+			$post->wpua_recorded_acks = json_decode(get_single_post_meta($post->ID, WPUA_DATA_FIELD_KEY));
 			$post->all_versions = get_article_versions_internal($post->ID);
 			$post->category_parent = $cat->cat_ID;
 		endforeach;

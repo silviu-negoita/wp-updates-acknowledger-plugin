@@ -28,3 +28,12 @@ function isJson($string) {
   json_decode($string);
   return (json_last_error() == JSON_ERROR_NONE);
 }
+
+function get_single_post_meta($article_id, $key) {
+  //this seems a bug because when i request a single custom field value(the 3rd true parameter) and it not exists anywhere, it returns an array() instead of empty string
+  $result = get_post_meta($article_id, $key, true);
+  if (is_array($result) || empty($result) ) {
+    return;
+  } 
+  return $result;
+}
