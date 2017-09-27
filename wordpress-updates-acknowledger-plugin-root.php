@@ -21,27 +21,28 @@ include_once "wordpress-dom-customizer.php";
  * Function called form both plugin and rest controller. When is called from plugin, it also init cosntants to JS. This represnts a messy workaround to init common constants between JS(client) and PHP(server).
  */
 function register_constants($jsInit) {
-  if (!defined(WPUA_CONTANTS_REGISTERED)) {
-    define(WPUA_CONTANTS_REGISTERED, true);
+  if (!defined('WPUA_CONTANTS_REGISTERED')) {
+    define('WPUA_CONTANTS_REGISTERED', true);
      // key to custom_field which records all acks
-    define(WPUA_DATA_FIELD_KEY, "wpua_data_field");
-    define(WPUA_ARTICLE_VERSIONS_KEY, "wpua_article_versions");
-    define(WPUA_WIDGET_TITLE, "Updates Ancknowledger");
+    define('WPUA_DATA_FIELD_KEY', "wpua_data_field");
+    define('WPUA_ARTICLE_VERSIONS_KEY', "wpua_article_versions");
+    define('WPUA_WIDGET_TITLE', "Updates Ancknowledger");
 
     // define common constants
-    define(WIDGET_BODY_ID, "wpua_tableId");
-    define(ARTICLE_PARAMETER_NAME, "articleId");
-    define(WPUA_OVERVIEW_PAGE_CONTAINER_ID, "wpua_overview_page_container_id");
+    define('WIDGET_BODY_ID', "wpua_tableId");
+    define('ARTICLE_PARAMETER_NAME', "articleId");
+    define('WPUA_OVERVIEW_PAGE_CONTAINER_ID', "wpua_overview_page_container_id");
 
     // value of custom_field which records all acks
-    define(ARTICLE_DATA_FIELD_VALUE, "articleDataFieldValue");
-    define(REST_WIDGET_RESULT_DATA_ALL_USERS_FIELD, "restWidgetResultDataAllUsersField");
-    define(REST_WIDGET_RESULT_DATA_RECORDED_STATISTICS_FIELD, "restWidgetResultDataRecordedStatisiticsField");
-    define(REST_WIDGET_RESULT_DATA_ALL_ARTICLE_VERSIONS_FIELD, "restWidgetResultDataAllArticleVersionsField");
-    define(REST_OVERVIEW_PAGE_RESULT_CATEGORIES_FIELD, "restOverviewPageResultCategoriesField");
-    define(LOGGED_USER_PARAMETER_NAME, "loggedUserParameterName");
-    define(IS_ADMIN_LOGGED_USER, "isAdminLoggedParameterName");
-    define(RELATIVE_SITE_URL, get_site_url(null, null, 'relative'));
+    define('ARTICLE_DATA_FIELD_VALUE', "articleDataFieldValue");
+    define('REST_WIDGET_RESULT_DATA_ALL_USERS_FIELD', "restWidgetResultDataAllUsersField");
+    define('REST_WIDGET_RESULT_DATA_RECORDED_STATISTICS_FIELD', "restWidgetResultDataRecordedStatisiticsField");
+    define('REST_WIDGET_RESULT_DATA_ALL_ARTICLE_VERSIONS_FIELD', "restWidgetResultDataAllArticleVersionsField");
+    define('REST_WIDGET_RESULT_DATA_RECORDED_ACKS_FIELD', "restWidgetResultDataAllArticleRecoredAcksField");
+    define('REST_OVERVIEW_PAGE_RESULT_CATEGORIES_FIELD', "restOverviewPageResultCategoriesField");
+    define('LOGGED_USER_PARAMETER_NAME', "loggedUserParameterName");
+    define('IS_ADMIN_LOGGED_USER', "isAdminLoggedParameterName");
+    define('RELATIVE_SITE_URL', get_site_url(null, null, 'relative'));
   }
 
   // now link them to JS part. conisder to replace with a method
@@ -198,7 +199,7 @@ class wp_my_plugin extends WP_Widget {
 
   // constructor
   function __construct() {
-    parent::WP_Widget(false, $name = __('Update Ancknowledger Widget', 'wp_widget_plugin'));
+    parent::__construct(false, $name = __('Update Ancknowledger Widget', 'wp_widget_plugin'));
 
 
   }
