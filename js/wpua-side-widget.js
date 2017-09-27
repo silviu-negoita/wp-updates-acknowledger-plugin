@@ -1,4 +1,3 @@
-
 jQuery(document).ready(function () {
     jQuery("#" + WPUAConstants.WIDGET_BODY_ID).ready(
       get_data_from_server(render_widget)
@@ -79,7 +78,20 @@ function create_ack_table(allVersions, allUsers, recordedAcks) {
 function create_version_cell(version) {
   //TODO Anca here should be created anchors from js dom customizer
   td = document.createElement("td")
-  td.innerHTML = version[0] + " <small>" + version[1] + "</small>"
+  version_cell_content = Wpua_Hook.call('render_side_widget_version_cell_content', version);
+
+  if(version_cell_content != undefined) {
+    if (typeof version_cell_content == "object") {
+      // we ssume that if it is object, it is dom element
+      td.appendChild(version_cell_content)
+    } else {
+      td.innerHTML = version_cell_content
+    }
+  } else {
+    // the default behavior
+     td.innerHTML = version[0] + " <small>" + version[1] + "</small>"
+  }
+ 
   return td
 }
 

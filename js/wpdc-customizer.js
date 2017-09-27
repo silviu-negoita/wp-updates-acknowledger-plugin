@@ -119,6 +119,9 @@ function labelManage() {
 }
 
 jQuery(document).ready(function () {
+	Wpua_Hook.register("render_side_widget_version_cell_content", (version) => {
+	    // TODO Anca return something usefull to attach in side widget version cells
+	})
 	removeElems();
 	labelManage();
 });

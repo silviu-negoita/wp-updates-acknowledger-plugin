@@ -8,8 +8,8 @@
  * Version: 2.1.1
  */
 
-include_once "wordpress-updates-acknowledger-overview-content.php";
 include_once "wordpress-updates-acknowledger-common-utils.php";
+include_once "wordpress-updates-acknowledger-overview-content.php";
 // load old 'Js Dom Customizer' plugin
 include_once "wordpress-dom-customizer.php";
 
@@ -76,10 +76,10 @@ function wpua_init() {
   loadStyleDependency('wpua-styles-css',  'css/wpua_styles.css');
   loadStyleDependency('wpua-font-awesome',  'css/font-awesome.css');
 
+  loadJsDependency('wpua-common', 'js/wpua-common.js');
   loadJsDependency('loadJsDependency', 'js/wpua-side-widget.js');
   loadJsDependency('float-thead-js', 'js/float-thead.js');
   loadJsDependency('wpua-overview-widget', 'js/wpua-overview-content.js');
-  loadJsDependency('wpua-common', 'js/wpua-common.js');
 }
 
 add_action('wp_enqueue_scripts', 'wpua_init');
@@ -89,12 +89,13 @@ add_action('wp_enqueue_scripts', 'wpua_init');
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 function get_article_versions_internal($article_id) {
-  $all_versions_meta = get_post_meta($article_id, WPUA_ARTICLE_VERSIONS_KEY, true);
-  if (!is_null($all_versions_meta)) {
-    $all_versions = json_decode($all_versions_meta);
-    rsort($all_versions);
-    return $all_versions;
-  } 
+  $all_versions_meta = get_single_post_meta($article_id, WPUA_ARTICLE_VERSIONS_KEY);
+  if (is_null($all_versions_meta)) {
+    return;
+  }
+  $all_versions = json_decode($all_versions_meta);
+  rsort($all_versions);
+  return $all_versions;
 }
 /**
  * Method called from JS to get data to render for article widget. It returns a data structure with following fields:
@@ -110,7 +111,7 @@ function load_wpua_widget_data($request) {
   if (empty($articleDataFieldValue) || is_null($articleDataFieldValue)) {
     update_post_meta($article_id, WPUA_DATA_FIELD_KEY, array());
   }
-  $result[REST_WIDGET_RESULT_DATA_RECORDED_ACKS_FIELD] = json_decode(get_post_meta($article_id, WPUA_DATA_FIELD_KEY, true));
+  $result[REST_WIDGET_RESULT_DATA_RECORDED_ACKS_FIELD] = json_decode(get_single_post_meta($article_id, WPUA_DATA_FIELD_KEY));
   $result[REST_WIDGET_RESULT_DATA_ALL_ARTICLE_VERSIONS_FIELD] = get_article_versions_internal($article_id);
   return $result;
 }
@@ -159,7 +160,6 @@ function savePreferences($request) {
  */
 function register_api_routes() {
   // define common constants
-  log_me(phpversion());
   register_constants(false);
   // responds to http://localhost/wp/wp-json/wpua/api/get_all_registered_users
   register_rest_route('wpua/api/', '/load_wpua_widget_data', array(
@@ -197,7 +197,7 @@ add_action('rest_api_init', "register_api_routes");
 class wp_my_plugin extends WP_Widget {
 
   // constructor
-  function wp_my_plugin() {
+  function __construct() {
     parent::WP_Widget(false, $name = __('Update Ancknowledger Widget', 'wp_widget_plugin'));
 
 
