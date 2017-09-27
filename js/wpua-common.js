@@ -20,6 +20,9 @@ function make_server_request(request_type, request_uri, params, callback) {
     url: WPUAConstants.RELATIVE_SITE_URL + request_uri,
     dataType: "json",
     data: params,
-    success: callback
+    success: callback,
+    error: function(xhr, ajaxOptions, thrownError) {
+      console.log(xhr, ajaxOptions, thrownError)
+    }
   });
 }

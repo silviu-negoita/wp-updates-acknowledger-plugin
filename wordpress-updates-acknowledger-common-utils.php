@@ -16,9 +16,7 @@ function log_me($message) {
 function loadJsDependency($handle, $file_location_relative_to_plugin) {
   $widget_js_dep = plugin_dir_url(__FILE__) . $file_location_relative_to_plugin;
   wp_register_script($handle, $widget_js_dep);
-  wp_enqueue_script($handle, array(
-    'jquery'
-  ));
+  wp_enqueue_script($handle, $widget_js_dep, array('jquery'), '', true);
 }
 
 function loadStyleDependency($handle, $file_location_relative_to_plugin) {

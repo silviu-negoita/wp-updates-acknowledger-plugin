@@ -23,11 +23,7 @@ function process_cat_tree( $cat , $nesting_level,  &$parsed_categories) {
 		foreach( $cat_posts as $post ) :
 			$post->permalink = get_permalink( $post->ID );
 			$post->wpua_recorded_acks = json_decode(get_post_meta($post->ID, WPUA_DATA_FIELD_KEY, true));
-			// sort versions
-			$all_versions = json_decode(get_post_meta($post->ID, WPUA_ARTICLE_VERSIONS_KEY, true));
-  		rsort($all_versions);
-			
-			$post->all_versions = $all_versions;
+			$post->all_versions = get_article_versions_internal($post->ID);
 			$post->category_parent = $cat->cat_ID;
 		endforeach;
 		$cat->articles = $cat_posts;

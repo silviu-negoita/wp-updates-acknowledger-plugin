@@ -89,9 +89,12 @@ add_action('wp_enqueue_scripts', 'wpua_init');
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 function get_article_versions_internal($article_id) {
-  $all_versions = json_decode(get_post_meta($article_id, WPUA_ARTICLE_VERSIONS_KEY, true));
-  rsort($all_versions);
-  return $all_versions;
+  $all_versions_meta = get_post_meta($article_id, WPUA_ARTICLE_VERSIONS_KEY, true);
+  if (!is_null($all_versions_meta)) {
+    $all_versions = json_decode($all_versions_meta);
+    rsort($all_versions);
+    return $all_versions;
+  } 
 }
 /**
  * Method called from JS to get data to render for article widget. It returns a data structure with following fields:
@@ -156,6 +159,7 @@ function savePreferences($request) {
  */
 function register_api_routes() {
   // define common constants
+  log_me(phpversion());
   register_constants(false);
   // responds to http://localhost/wp/wp-json/wpua/api/get_all_registered_users
   register_rest_route('wpua/api/', '/load_wpua_widget_data', array(
