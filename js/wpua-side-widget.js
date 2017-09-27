@@ -60,25 +60,27 @@ function create_ack_table(allVersions, allUsers, recordedAcks) {
   tableElement.appendChild(tbody)
 
   // a versions look like ["v1.1.0", "2017-15-23"]. The first param is value, second is a small comment
+  let version_index = 0
   allVersions.forEach(function(version) {
     tr = create_table_row()
     // append first column cells (for Versions column)
-    tr.appendChild(create_version_cell(version))
+    tr.appendChild(create_version_cell(version, version_index))
     allUsers.map(function(serverUser) {
       return serverUser.ID
     }).forEach(function(user) {
       tr.appendChild(create_edit_table_cell(version[0], user, recordedAcks))
     });
     tbody.appendChild(tr)
+    version_index++
   });
 
   return tableElement
 }
 
-function create_version_cell(version) {
+function create_version_cell(version, version_index) {
   //TODO Anca here should be created anchors from js dom customizer
   td = document.createElement("td")
-  version_cell_content = Wpua_Hook.call('render_side_widget_version_cell_content', version);
+  version_cell_content = Wpua_Hook.call('render_side_widget_version_cell_content', [version, version_index]);
 
   if(version_cell_content != undefined) {
     if (typeof version_cell_content == "object") {
