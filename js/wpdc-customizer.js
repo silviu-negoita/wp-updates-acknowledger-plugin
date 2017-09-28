@@ -41,7 +41,7 @@ function findPos(obj) {
 function goToNext(element, withParent) {
 	// jQuery selector - by specific class new-v*
 	var classAttr = withParent ? element.parentElement.classList[2] : element.classList[2];
-	var classSelector = jQuery("." + classAttr.replace('.', "\\."));
+	var classSelector = jQuery("." + classAttr.replace(/\./g, "\\."));
 	var indexOfEnclosingSpan = classSelector.index(jQuery(element.parentElement));
 	// retrieve next span element with specific class
 	var nextElement = classSelector.slice(indexOfEnclosingSpan+1).first();

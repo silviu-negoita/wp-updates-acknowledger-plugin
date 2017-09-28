@@ -22,8 +22,7 @@ Modifications #2nd iteration: redirecting to other pages
 	root url and redirection url => when on root url, user is redirected to redirection url
 
 Modifications #3rd iteration: labels customization and management
-- searching for version declarations pattern like versions = [v6 - 2016-10-05, v4 - 2017-01-05,  v5- 2017-01-05]
-- when found, replace them with bootstrap labels that will stay above
+- get versions = [["v1.1.1", "2017-15-26"], ["v1.2.1", "2017-15-25"], ["v1.3.2", "2017-15-25"]] from rest api
 - remove previous all labels NEW vx found in the article, where x < 4
 
 Modifications #4th iteration: ui design:
