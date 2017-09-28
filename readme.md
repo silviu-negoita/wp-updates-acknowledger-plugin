@@ -12,28 +12,17 @@ To use the overview page, just add custom field on any post : wpua_updates_ackno
 
 Manipulates the DOM, in order to apply customizations. We prefer this approach to directly modifying the template files, to be able to update the theme.
 
-Modifications #1st iteration: removing elements
+## removing elements from DOM
 - removed author meta information "\w? has written \d? articles"
 - removed button with "Article was helpful" and link "\d? people found this article useful"
 - removed article footer "This entry..."
 
-Modifications #2nd iteration: redirecting to other pages
+## redirecting to other pages
 - added a settings page for the plugin where administrator completes two fields:
 	root url and redirection url => when on root url, user is redirected to redirection url
 
-Modifications #3rd iteration: labels customization and management
-- get versions = [["v1.1.1", "2017-15-26"], ["v1.2.1", "2017-15-25"], ["v1.3.2", "2017-15-25"]] from rest api
-- remove previous all labels NEW vx found in the article, where x < 4
-
-Modifications #4th iteration: ui design:
-- versions from above splitted by spaces
-- order: newer elder
-
-Modifications #5th iteration: labels customization and management
+## labels customization and management
+- get versions = [["v1.1.1", "2017-15-26"], ["v1.2.1", "2017-15-25"], ["v1.3.2", "2017-15-25"]] from REST api 
+- versions are rendered as labels in post content and in the side widget table (red if latest, orange if before latest, grey if elder)
 - by clicking on a label one can navigate to the next label of the same type
   e.g. clicking on a NEW v3 redirects to the next NEW v3
-  
-Modifications #6th iteration: labels customization and management
-- bug: `Modifications #3rd iteration` remove previous all labels NEW vx found in the article, where x < 4: in some cases
-  the whole line was being removed
-- fixed and added the following functionality: instead of removing NEW vx, replace with a discrete grey span containing text `vx` 

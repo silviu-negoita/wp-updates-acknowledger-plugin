@@ -4,25 +4,7 @@ function removeElems() {
 	// itterate through selectors array an remove them from DOM
 	selectorsToBeRemoved.forEach(function(selector) {
 		jQuery(selector).remove();
-	});	
-}
-
-// a map with some plus functionality
-var ExtendedMap = function() {	};
-
-// return the value from the `n`-th entry, given that the entries are sorted by their keys
-ExtendedMap.prototype.valueAtIndex = function(n) {
-	return this[Object.keys(this).sort()[n]];
-}
-
-// return the key from the `n`-th entry given that the entries are sorted by their keys
-ExtendedMap.prototype.keyAtIndex = function(n) {
-	return Object.keys(this).sort()[n];
-}
-
-// returns number of entries in the map
-ExtendedMap.prototype.length = function() {
-	return Object.keys(this).length;
+	});
 }
 
 //Finds y value of given object
@@ -66,17 +48,19 @@ function labelManage() {
     var textToSearch = jQuery('article').children('.entry-content')[0].innerHTML;
     var versionArray = [];
     make_server_request("GET", "/wp-json/wpua/api/getArticleVersions", {}, function(response) {
+		// obtain versions as an array of arrays, e.g: [["v1.1.1", "2017-15-26"], ["v1.2.1", "2017-15-25"], ["v1.3.2", "2017-15-25"]]
+		// they come ordered from server
         versionsArray = response.restWidgetResultDataAllArticleVersionsField;
         if (versionsArray.length == 0) return;
 
-        // obtain the last and the penultimate version and also their complete declaration		
-        // e.g: lastVersion
+        // obtain the last and the penultimate version number
+        // e.g: for v6, stringVersion = 6
         var versionRegexp1 = /v(.*)/g;
         var latestVersionMatch1 = versionRegexp1.exec(versionsArray[0][0]);
 		var latestStringVersion1 = latestVersionMatch1[1];
 		var versionRegexp2 = /v(.*)/g;
         var latestVersionMatch2 = versionRegexp2.exec(versionsArray[1][0]);
-        // e.g: for v6 - 2016-10-05, stringVersion = 6
+        // e.g: for v6, stringVersion = 6
         var latestStringVersion2 = latestVersionMatch2[1];
 
         // string that will retain the progressive replacement of the versions declarations with nice bootstrap spans
@@ -121,8 +105,10 @@ function labelManage() {
 }
 
 jQuery(document).ready(function () {
+	// renders version spans in the side table widget
 	Wpua_Hook.register("render_side_widget_version_cell_content", (version) => {
 		span = document.createElement("span");
+		// matches color according to the the degree of novelty (red for latest, orange for before latest, grey for elder)
 		if (version[1] == 0) {
 			span.setAttribute("class", "label label-danger new-" + version[0][0]);
 		} else if (version[1] == 1) {
@@ -134,7 +120,7 @@ jQuery(document).ready(function () {
 		span.innerHTML = version[0][0] + " - " + version[0][1];
 		span.setAttribute("onclick", "goToNext(this, false)");
 		return span;
-	})
+	});
 	removeElems();
 	labelManage();
 });
