@@ -38,9 +38,10 @@ function findPos(obj) {
 }
 
 // knows how to navigate to the next element with the same class "new-v*" as the current `element`
-function goToNext(element) {
+function goToNext(element, withParent) {
 	// jQuery selector - by specific class new-v*
-	var classSelector = jQuery("." + element.parentElement.classList[2].replace('.', "\\."));
+	var classAttr = withParent ? element.parentElement.classList[2] : element.classList[2];
+	var classSelector = jQuery("." + classAttr.replace('.', "\\."));
 	var indexOfEnclosingSpan = classSelector.index(jQuery(element.parentElement));
 	// retrieve next span element with specific class
 	var nextElement = classSelector.slice(indexOfEnclosingSpan+1).first();
@@ -70,17 +71,18 @@ function labelManage() {
 
         // obtain the last and the penultimate version and also their complete declaration		
         // e.g: lastVersion
-        var versionRegexp = /v(.*)/g;
-        var latestVersionMatch1 = versionRegexp.exec(versionsArray[0][0]);
-        var latestVersionMatch2 = versionRegexp.exec(versionsArray[1][0]);
+        var versionRegexp1 = /v(.*)/g;
+        var latestVersionMatch1 = versionRegexp1.exec(versionsArray[0][0]);
+		var latestStringVersion1 = latestVersionMatch1[1];
+		var versionRegexp2 = /v(.*)/g;
+        var latestVersionMatch2 = versionRegexp2.exec(versionsArray[1][0]);
         // e.g: for v6 - 2016-10-05, stringVersion = 6
-        var latestStringVersion1 = latestVersionMatch1[1];
         var latestStringVersion2 = latestVersionMatch2[1];
 
         // string that will retain the progressive replacement of the versions declarations with nice bootstrap spans
         var replaced = textToSearch;
 
-        var anchorHTML = ' (<a style="color: white;  text-decoration: underline; cursor: pointer" onclick="goToNext(this)">go to next</a>)';
+        var anchorHTML = ' (<a style="color: white;  text-decoration: underline; cursor: pointer" onclick="goToNext(this, true)">go to next</a>)';
         // two versions
         if (latestStringVersion1 != undefined && latestStringVersion2 != undefined) {
             // search for possible NEW v<index> through the content
@@ -120,7 +122,18 @@ function labelManage() {
 
 jQuery(document).ready(function () {
 	Wpua_Hook.register("render_side_widget_version_cell_content", (version) => {
-	    // TODO Anca return something usefull to attach in side widget version cells
+		span = document.createElement("span");
+		if (version[1] == 0) {
+			span.setAttribute("class", "label label-danger new-" + version[0][0]);
+		} else if (version[1] == 1) {
+			span.setAttribute("class", "label label-warning new-" + version[0][0]);
+		} else {
+			span.setAttribute("class", "label label-default new-" + version[0][0]);
+		}
+		span.setAttribute("style", "font-size: 80%; cursor: pointer; padding-top: 4%; padding-bottom: 3%; font-weight: bold");
+		span.innerHTML = version[0][0] + " - " + version[0][1];
+		span.setAttribute("onclick", "goToNext(this, false)");
+		return span;
 	})
 	removeElems();
 	labelManage();

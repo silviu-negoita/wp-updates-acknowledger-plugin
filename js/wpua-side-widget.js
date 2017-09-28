@@ -78,8 +78,9 @@ function create_ack_table(allVersions, allUsers, recordedAcks) {
 }
 
 function create_version_cell(version, version_index) {
-  //TODO Anca here should be created anchors from js dom customizer
   td = document.createElement("td")
+  jQuery(td).addClass("wpua_centered_cell_content");
+  
   version_cell_content = Wpua_Hook.call('render_side_widget_version_cell_content', [version, version_index]);
 
   if(version_cell_content != undefined) {
