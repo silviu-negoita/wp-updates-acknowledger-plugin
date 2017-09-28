@@ -58,17 +58,19 @@ function labelManage() {
         var versionRegexp1 = /v(.*)/g;
         var latestVersionMatch1 = versionRegexp1.exec(versionsArray[0][0]);
 		var latestStringVersion1 = latestVersionMatch1[1];
-		var versionRegexp2 = /v(.*)/g;
-        var latestVersionMatch2 = versionRegexp2.exec(versionsArray[1][0]);
-        // e.g: for v6, stringVersion = 6
-        var latestStringVersion2 = latestVersionMatch2[1];
+
 
         // string that will retain the progressive replacement of the versions declarations with nice bootstrap spans
         var replaced = textToSearch;
 
         var anchorHTML = ' (<a style="color: white;  text-decoration: underline; cursor: pointer" onclick="goToNext(this, true)">go to next</a>)';
         // two versions
-        if (latestStringVersion1 != undefined && latestStringVersion2 != undefined) {
+        if (latestStringVersion1 != undefined && versionsArray.length > 1) {
+			var versionRegexp2 = /v(.*)/g;
+			var latestVersionMatch2 = versionRegexp2.exec(versionsArray[1][0]);
+			// e.g: for v6, stringVersion = 6
+			var latestStringVersion2 = latestVersionMatch2[1];
+		
             // search for possible NEW v<index> through the content
             // where index is the last version or the penultimate version index, replace with spans
             var newVRegexp = new RegExp("NEW v(" + latestStringVersion1 + ")", "g");
@@ -78,8 +80,9 @@ function labelManage() {
             newVRegexp = new RegExp("NEW v(" + (latestStringVersion2) + ")(?!\\.)", "g");
             replaced = replaced.replace(newVRegexp, '<span style="font-size: x-small" class="label label-warning new-v$1">NEW v$1' + anchorHTML + '</span>');
 
-            // where index is different from (negative lookahead) last version or penultimateVersion, replace with a discrete span containing version number (v$2)s
-            newVRegexp = new RegExp('(NEW v((?!' + latestStringVersion1 + '|' + latestStringVersion2 + ').*?))\\s+', "g");
+            // where index is different from (negative lookahead) last version or penultimateVersion, replace with a discrete span containing version number (v$2)
+			// another small hack: sometimes we find in text strings like this <p>NEW v4.2></p> and we do not have to take into our capture group "</p>"
+            newVRegexp = new RegExp('(NEW v((?!' + latestStringVersion1 + '|' + latestStringVersion2 + ').*?)(<\/p>)?)\\s+', "g");
             replaced = replaced.replace(newVRegexp, '<span style="font-size: x-small" class="label label-default new-v$2">v$2' + anchorHTML + '</span> ');
 
             // only one version									
@@ -92,7 +95,8 @@ function labelManage() {
             replaced = replaced.replace(newVRegexp, '<span style="font-size: x-small" class="label label-danger new-v$1">NEW v$1' + anchorHTML + '</span>');
 
             // where index is different from (negative lookahead) last version, replace with a discrete span containing version number (v$2)
-            newVRegexp = new RegExp('(NEW v((?!' + latestStringVersion1 + ').*?))\\s+', "g");
+			// another small hack: sometimes we find in text strings like this <p>NEW v4.2></p> and we do not have to take into our capture group "</p>"
+            newVRegexp = new RegExp('(NEW v((?!' + latestStringVersion1 + ').*?)<\/p>?)\\s+', "g");
             replaced = replaced.replace(newVRegexp, '<span style="font-size: x-small" class="label label-default new-v$2">v$2' + anchorHTML + '</span> ');
 
             // when versions declaration did not respect the versionRegexp pattern	
