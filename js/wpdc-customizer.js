@@ -53,7 +53,7 @@ function labelManage() {
 		// obtain versions as an array of arrays, e.g: [["v1.1.1", "2017-15-26"], ["v1.2.1", "2017-15-25"], ["v1.3.2", "2017-15-25"]]
 		// they come ordered from server
         versionsArray = response.restWidgetResultDataAllArticleVersionsField;
-        if (versionsArray.length == 0) return;
+        if (versionsArray == undefined || versionsArray.length == 0) return;
 
         // obtain the last and the penultimate version number
         // e.g: for v6, stringVersion = 6

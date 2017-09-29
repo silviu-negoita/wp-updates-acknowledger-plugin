@@ -26,3 +26,4 @@ Manipulates the DOM, in order to apply customizations. We prefer this approach t
 - versions are rendered as labels in post content and in the side widget table (red if latest, orange if before latest, grey if elder)
 - by clicking on a label one can navigate to the next label of the same type
   e.g. clicking on a NEW v3 redirects to the next NEW v3
+

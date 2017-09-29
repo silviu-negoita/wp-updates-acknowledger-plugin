@@ -2,7 +2,7 @@
 
 function get_parsed_categories() {
   $parsed_categories = array();
-	foreach( get_categories('hide_empty=1') as $cat ) :
+	foreach( get_categories('hide_empty=0') as $cat ) :
 		 if( !$cat->parent ) {
 			 process_cat_tree( $cat , 0, $parsed_categories);
 		 }
@@ -28,11 +28,10 @@ function process_cat_tree( $cat , $nesting_level,  &$parsed_categories) {
 		$cat->articles = $cat_posts;
 	endif;
 
-	$next = get_categories('hide_empty=1&parent=' . $cat->term_id);
-
+	$next = get_categories('hide_empty=0&parent=' . $cat->term_id);
 	if( $next ) :
+		$nesting_level++;
 		foreach( $next as $next_cat ) :
-			$nesting_level++;
 			$next_cat->category_parent = $cat->term_id;
 			process_cat_tree( $next_cat , $nesting_level, $parsed_categories);
 		endforeach;

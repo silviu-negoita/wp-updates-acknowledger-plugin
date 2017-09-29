@@ -1,9 +1,35 @@
+// Declare constants
+
+const overview_table_id = "wpua-table-element"
+const overview_table_id_selector = "#" + overview_table_id
+const category_expaned_class = "fa-folder-open-o"
+const category_collapsed_class = "fa-folder-o"
+
+
 jQuery(document).ready(() => {
   jQuery("#" + WPUAConstants.WPUA_OVERVIEW_PAGE_CONTAINER_ID).ready(() => {
+    let rootElement = jQuery("#" + WPUAConstants.WPUA_OVERVIEW_PAGE_CONTAINER_ID).get(0)
+    if (rootElement == undefined) {
+      return
+    }
+
+    rootElement.innerHTML = "<h1> <i class=\"fa fa-spin fa-spinner\" aria-hidden=\"true\"></i> Loading data ... </h1>"
     get_overview_data(render_overview_content)
+    remove_unused_dom_content()
   });
 })
 
+/*
+* This method is used to remove some content from regular post page to transform it in a root page
+* e.g. we remove the sidebar, the meta info etc
+*/
+function remove_unused_dom_content() {
+  jQuery("#primary").removeClass("col-md-8")
+  jQuery("#primary").addClass("col-md-12")
+  jQuery("#secondary").remove()
+  jQuery(".entry-meta").remove()
+  jQuery("#breadcrumbs").remove()
+}
 
 function get_overview_data(callback) {
   make_server_request("GET", "/wp-json/wpua/api/getOverviewData", {}, callback)
@@ -14,22 +40,20 @@ function get_overview_data(callback) {
  */
 function render_overview_content(result) {
   let rootElement = jQuery("#" + WPUAConstants.WPUA_OVERVIEW_PAGE_CONTAINER_ID).get(0)
-  
-  if (rootElement == undefined) {
-    return
-  }
-
+  // empty the root element content 
+  jQuery(rootElement).empty()
   // attach collapse/expand buttons
   let expand = document.createElement("button")
-  jQuery(expand).addClass("btn btn-sm btn-warning")
-  expand.innerHTML = "<i class=\"fa fa-minus\"/> Expand all articles"
+  jQuery(expand).addClass("btn btn-sm btn-primary")
+  expand.innerHTML = "<i class=\"fa fa-plus\"></i> Expand all articles"
   jQuery(expand).click(on_expand_all_articles_click_event_handler)
   rootElement.appendChild(expand)
 
   let collapse = document.createElement("button")
-  jQuery(collapse).addClass("btn btn-sm btn-primary")
+  jQuery(collapse).addClass("btn btn-sm btn-success")
+  jQuery(collapse).css("margin-left", "5px")
   jQuery(collapse).click(on_collapse_to_categoriesArticleClickEventHandler)
-  collapse.innerHTML = "<i class=\"fa fa-plus\"/>  Collapse to categories"
+  collapse.innerHTML = "<i class=\"fa fa-minus\"></i>  Collapse to categories"
   rootElement.appendChild(collapse)
 
 
@@ -40,12 +64,10 @@ function render_overview_content(result) {
   rootElement.appendChild(table_wrapper)
 
   // now remove the sidebar and make the content wider
-  jQuery("#primary").removeClass("col-md-8")
-  jQuery("#primary").addClass("col-md-12")
-  jQuery("#secondary").remove()
+
 
   // activate fixed header on table
-  jQuery("#wpua-table-element").floatThead({
+  jQuery(overview_table_id_selector).floatThead({
     scrollContainer: ($table) => {
       return jQuery(table_wrapper)
     }
@@ -56,7 +78,7 @@ function create_overview_table(data) {
   let categories_and_articles = data[WPUAConstants.REST_OVERVIEW_PAGE_RESULT_CATEGORIES_FIELD]
   let all_users = data[WPUAConstants.REST_WIDGET_RESULT_DATA_ALL_USERS_FIELD]
   tableElement = document.createElement("table");
-  jQuery(tableElement).attr("id", "wpua-table-element")
+  jQuery(tableElement).attr("id", overview_table_id)
   jQuery(tableElement).addClass("table table-hover")
 
   // append table header
@@ -108,7 +130,7 @@ function create_overview_table_category_cell(category_name, nesting_level) {
   td.appendChild(wrapper);
 
   let icon = document.createElement("i")
-  jQuery(icon).addClass("fa fa-folder-open-o ")
+  jQuery(icon).addClass("fa " + category_expaned_class)
   
   wrapper.appendChild(icon)
 
@@ -120,77 +142,6 @@ function create_overview_table_category_cell(category_name, nesting_level) {
   return td
 }
 
-/*
- * This is a click handler for category icon. This represents the entry point for tree logic
- */
-function on_category_icon_click_event_handler(event) {
-  let category_row_element = jQuery(event.target).closest("tr")[0]
-  
-  icon = jQuery(category_row_element).find("i")[0]
-  if (jQuery(icon).hasClass('fa-folder-open-o')) {
-    collapse_or_expand_category(category_row_element, true)
-  } else {
-    collapse_or_expand_category(category_row_element, false)
-  }
-}
-
-function on_expand_all_articles_click_event_handler(event) {
-  all_categories = jQuery("#wpua-table-element").find(".is-category[level=0]")
-  all_categories.get().forEach((category) => {
-      collapse_or_expand_category(category, false)
-  })
-} 
-
-function on_collapse_to_categoriesArticleClickEventHandler(event) {
-  all_categories = jQuery("#wpua-table-element").find(".is-category[level=0]")
-  all_categories.get().forEach((category) => {
-     collapse_to_categories(category)
-  })
-
-}
-
-function collapse_to_categories(category) {
-  let category_articles = jQuery('#wpua-table-element').find(".is-article[category_parent=" + jQuery(category).attr("category_id") + "]")
-  if (category_articles.length >  0) {
-    // no articles, so collapse
-    collapse_or_expand_category(category, true)
-    return
-  } 
-
-  let subcategories = jQuery('#wpua-table-element').find(".is-category[category_parent=" + jQuery(category).attr("category_id") + "]")
-  subcategories.get().forEach((subcategory) => {
-    collapse_to_categories(subcategory)
-  })
-}
-
-
-function collapse_or_expand_category(category_row_element, collapse) {
-  let allNextSiblingsWithLowerLevel = []
-  let next = jQuery(category_row_element).next("tr")[0]
-  while (next != undefined && jQuery(next).attr('level') > jQuery(category_row_element).attr('level')) {
-    allNextSiblingsWithLowerLevel.push(next)
-    next = jQuery(next).next("tr")[0]
-  }
-  icon = jQuery(category_row_element).find("i")[0]
-  allNextSiblingsWithLowerLevel.forEach((sibling) => {
-      if (collapse) {
-        jQuery(icon).removeClass('fa-folder-open-o')
-        jQuery(icon).addClass('fa-folder-o')
-        jQuery(sibling).fadeOut(200)
-      } else {
-        // needs to expand
-        jQuery(icon).removeClass('fa-folder-o')
-        jQuery(icon).addClass('fa-folder-open-o')
-        jQuery(sibling).fadeIn(200)
-        // but also check if categories already collapsed. if it is collapsed, expand it too
-        let icons = jQuery(sibling).find("i")
-        if (icons.length > 0) {
-          jQuery(icons[0]).removeClass('fa-folder-o')
-          jQuery(icons[0]).addClass('fa-folder-open-o')
-        }
-      }
-  })
-}
 
 function create_overview_table_article_row(article, all_users, nesting_level) {
   let tr = document.createElement("tr")
@@ -221,7 +172,7 @@ function create_overview_table_article_row(article, all_users, nesting_level) {
 
 function create_version_label(version, clazz) {
   td = document.createElement('td')
-  jQuery(td).css("text-align", "center")
+  jQuery(td).addClass("wpua_centered_cell_content")
 
   label = document.createElement("label")
   label.innerHTML = version
@@ -310,4 +261,87 @@ function create_overview_table_header(all_users) {
     tr.appendChild(th)
   })
   return thead
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// TREE LOGIC PART
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*
+ * This is a click handler for category icon. This represents the entry point for tree logic
+ */
+function on_category_icon_click_event_handler(event) {
+  let category_row_element = jQuery(event.target).closest("tr")[0]
+  
+  icon = jQuery(category_row_element).find("i")[0]
+  if (jQuery(icon).hasClass(category_expaned_class)) {
+    collapse_or_expand_category(category_row_element, true)
+  } else {
+    collapse_or_expand_category(category_row_element, false)
+  }
+}
+
+function on_expand_all_articles_click_event_handler(event) {
+  collapse_or_expand_all_categories(false)
+} 
+
+function on_collapse_to_categoriesArticleClickEventHandler(event) {
+  custom_category_validator = (category) => {
+    let subcategory_childs = jQuery(overview_table_id_selector).find(".is-category[category_parent=" + jQuery(category).attr("category_id") + "]").get()
+    // if a category has other subcategories, do not collapse
+    return subcategory_childs.length < 1
+  }
+
+  collapse_or_expand_all_categories(true, custom_category_validator)
+}
+
+function collapse_or_expand_all_categories(collapse, custom_category_validator) {
+  all_categories = jQuery(overview_table_id_selector).find(".is-category[level=0]")
+  all_categories.get().forEach((category) => {
+     collapse_or_expand_category(category, collapse, custom_category_validator)
+  })
+}
+/**
+* Function which toggle 'category_expaned_class' and 'category_collapsed_class' classes on an icon depending on 'collapse'
+*/
+function toggle_category_icon(category, collapse) {
+    let icon = jQuery(category).find("i").get(0)
+    if (collapse) {
+      jQuery(icon).removeClass(category_expaned_class)
+      jQuery(icon).addClass(category_collapsed_class)
+    } else {
+      jQuery(icon).removeClass(category_collapsed_class)
+      jQuery(icon).addClass(category_expaned_class)
+    }
+}
+
+/*
+* Method which collapse or expand a category. Note the 'custom_category_validator' : this receives a category and return true or false if a category should expand/collapse, or not
+*/
+function collapse_or_expand_category(category, collapse, custom_category_validator) {
+  if (!jQuery(category).hasClass("is-category")) {
+    return
+  }
+
+  let should_collapse_this_category = collapse
+  if (custom_category_validator != undefined) {
+    // use the extra custom_category_validator
+    should_collapse_this_category = custom_category_validator(category)
+  }
+  toggle_category_icon(category, should_collapse_this_category)
+
+  let subcategory_childs = jQuery(overview_table_id_selector).find("[category_parent=" + jQuery(category).attr("category_id") + "]").get()
+
+  subcategory_childs.forEach((sibling) => {
+      if (should_collapse_this_category) {
+        jQuery(sibling).fadeOut(200)
+      } else {
+        // needs to expand
+        jQuery(sibling).fadeIn(200)
+      }
+      if(jQuery(sibling).hasClass("is-category")) {
+        collapse_or_expand_category(sibling, collapse, custom_category_validator)
+      }
+  })
 }
