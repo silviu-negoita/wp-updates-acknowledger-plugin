@@ -22,9 +22,9 @@ function findPos(obj) {
 // knows how to navigate to the next element with the same class "new-v*" as the current `element`
 function goToNext(element, withParent) {
 	// jQuery selector - by specific class new-v*
-	var classAttr = withParent ? element.parentElement.classList[2] : element.classList[2];
-	var classSelector = jQuery("." + classAttr.replace(/\./g, "\\."));
-	var indexOfEnclosingSpan = classSelector.index(jQuery(element.parentElement));
+	element = withParent ? element.parentElement : element;
+	var classSelector = jQuery("." + element.classList[2].replace(/\./g, "\\."));
+	var indexOfEnclosingSpan = classSelector.index(jQuery(element));
 	// retrieve next span element with specific class
 	var nextElement = classSelector.slice(indexOfEnclosingSpan+1).first();
 	
@@ -38,7 +38,9 @@ function goToNext(element, withParent) {
 	} else {
 		nextElement.attr("id", "next");
 	}
-	
+	if (classSelector.length >= 2 && indexOfEnclosingSpan ==  classSelector.length - 2){
+		alert("you reached the last label from this version");
+	}
 	var elementPos = findPos(document.getElementById("next")) - (screen.height/30);
 	window.scroll(0, elementPos);
 }
@@ -96,7 +98,7 @@ function labelManage() {
 
             // where index is different from (negative lookahead) last version, replace with a discrete span containing version number (v$2)
 			// another small hack: sometimes we find in text strings like this <p>NEW v4.2></p> and we do not have to take into our capture group "</p>"
-            newVRegexp = new RegExp('(NEW v((?!' + latestStringVersion1 + ').*?)<\/p>?)\\s+', "g");
+            newVRegexp = new RegExp('(NEW v((?!' + latestStringVersion1 + ').*?)(<\/p>)?)\\s+', "g");
             replaced = replaced.replace(newVRegexp, '<span style="font-size: x-small" class="label label-default new-v$2">v$2' + anchorHTML + '</span> ');
 
             // when versions declaration did not respect the versionRegexp pattern	
