@@ -104,7 +104,7 @@ function create_version_cell(version, version_index) {
 */
 function create_edit_table_cell(version, user, data, ) {
   td = document.createElement("td")
-  jQuery(td).addClass("wpua_center_table_cell")
+  jQuery(td).addClass("wpua_centered_cell_content")
   button = document.createElement("button")
 
   button.setAttribute("version", version);
