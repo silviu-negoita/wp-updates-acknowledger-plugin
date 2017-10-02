@@ -90,7 +90,7 @@ function labelManage() {
         // string that will retain the progressive replacement of the versions declarations with nice bootstrap spans
         var replaced = textToSearch;
 
-        var anchorHTML = ' (<a style="color: white;  text-decoration: underline; cursor: pointer" onclick="goToNext(this, true)">go to next</a>)';
+        var anchorHTML = ' (<a style="color: white; text-decoration: underline; cursor: pointer" onclick="goToNext(this, true)">go to next</a>)';
         // two versions
         if (latestStringVersion1 != undefined && versionsArray.length > 1) {
 			var versionRegexp2 = /v(.*)/g;
