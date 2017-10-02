@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Wordpress Updates Ancknowledger
- * Description: Manage the article viewers per each version; To render the 'Overview page', user shoud add an element with id = wpua_overview_page_container_id. 
+ * Description: Manage the article viewers per each version; To render the 'Overview page', user shoud add an shortcode [overview_page]
    Note: This plugin aggregates an existing plugin called "Js Dom Customizer"
  * Author: Silviu Negoita, Anca Barbu
  * Author URI: https://github.com/silviu-negoita
@@ -12,6 +12,7 @@ include_once "wordpress-updates-acknowledger-common-utils.php";
 include_once "wordpress-updates-acknowledger-overview-content.php";
 // load old 'Js Dom Customizer' plugin
 include_once "wordpress-dom-customizer.php";
+include_once "wordpress-html-inject-shorcode.php";
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // PLUGIN PART
@@ -274,3 +275,7 @@ function update_postmeta_hook($meta_id, $post_id, $meta_key, $meta_value) {
 add_action( 'update_post_meta', 'update_postmeta_hook', 10, 4 );
 add_action( 'add_post_metadata', 'update_postmeta_hook', 10, 4 );
 
+function overview_widget_shortcode($attrs) {
+    return '<div id="wpua_overview_page_container_id"></div>';
+}
+add_shortcode('overview_page', 'overview_widget_shortcode'); 
