@@ -5,7 +5,7 @@
    Note: This plugin aggregates an existing plugin called "Js Dom Customizer"
  * Author: Silviu Negoita, Anca Barbu
  * Author URI: https://github.com/silviu-negoita
- * Version: 2.4.4
+ * Version: 2.5.3
  */
 
 include_once "wordpress-updates-acknowledger-common-utils.php";
