@@ -249,7 +249,6 @@ function table_button_click_event_handler(buttonElement, recordedAcks) {
       change_table_button_style(buttonElement, version, user, recordedAcks)
     })
   }
-
 }
 
 /**
@@ -259,6 +258,10 @@ function create_warning_content() {
   alert = document.createElement("div")
   jQuery(alert).addClass("alert alert-info")
   jQuery(alert).css('margin-bottom', '0px');
-  alert.innerHTML = "No versions found for this article. Use custom field <code>wpua_article_versions</code> to declare them. (e.g.<code>[[\"v1.1.0\", \"2017-09-23\"], ...]</code>)";
+  let now = new Date();
+  let day = ("0" + now.getDate()).slice(-2);
+  let month = ("0" + (now.getMonth() + 1)).slice(-2);
+  let today = now.getFullYear() + "-" + (month) + "-" + (day);
+  alert.innerHTML = "No versions found for this article. Use custom field <code>wpua_article_versions</code> to declare them. e.g.<p><code>[[\"v1.0\", \"" + today +"\"]]</code></p>";
   return alert
 }

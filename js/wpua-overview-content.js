@@ -43,19 +43,18 @@ function render_overview_content(result) {
   // empty the root element content 
   jQuery(rootElement).empty()
   // attach collapse/expand buttons
-  let expand = document.createElement("button")
-  jQuery(expand).addClass("btn btn-sm btn-primary")
-  expand.innerHTML = "<i class=\"fa fa-plus\"></i> Expand all articles"
-  jQuery(expand).click(on_expand_all_articles_click_event_handler)
-  rootElement.appendChild(expand)
-
   let collapse = document.createElement("button")
   jQuery(collapse).addClass("btn btn-sm btn-success")
-  jQuery(collapse).css("margin-left", "5px")
   jQuery(collapse).click(on_collapse_to_categoriesArticleClickEventHandler)
   collapse.innerHTML = "<i class=\"fa fa-minus\"></i>  Collapse to categories"
   rootElement.appendChild(collapse)
 
+  let expand = document.createElement("button")
+  jQuery(expand).addClass("btn btn-sm btn-primary")
+  expand.innerHTML = "<i class=\"fa fa-plus\"></i> Expand all articles"
+  jQuery(expand).css("margin-left", "5px")
+  jQuery(expand).click(on_expand_all_articles_click_event_handler)
+  rootElement.appendChild(expand)
 
   // attach the table
   var table_wrapper = document.createElement("div")
@@ -65,6 +64,7 @@ function render_overview_content(result) {
 
   // now remove the sidebar and make the content wider
 
+  on_collapse_to_categoriesArticleClickEventHandler()
 
   // activate fixed header on table
   jQuery(overview_table_id_selector).floatThead({
@@ -156,7 +156,7 @@ function create_overview_table_article_row(article, all_users, nesting_level) {
   // second column, with last version
   if (article['all_versions'] != undefined) {
     last_version = article['all_versions'][0]
-    tr.appendChild(create_version_label(last_version[0], "label-success"))
+    tr.appendChild(create_version_label_from_full_version(last_version, "label-success"))
   } else {
     td = document.createElement("td")
     td.innerHTML = "N/A"
@@ -164,18 +164,18 @@ function create_overview_table_article_row(article, all_users, nesting_level) {
   }
 
   all_users.forEach((user) => {
-    tr.appendChild(create_overview_table_user_column_cell(article['wpua_recorded_acks'], user, last_version));
+    tr.appendChild(create_overview_table_user_column_cell(article['wpua_recorded_acks'], user, last_version, article['all_versions']));
   })
 
   return tr
 }
 
-function create_version_label(version, clazz) {
+function create_version_label(version_text, clazz) {
   td = document.createElement('td')
   jQuery(td).addClass("wpua_centered_cell_content")
 
   label = document.createElement("label")
-  label.innerHTML = version
+  label.innerHTML = version_text
   jQuery(label).addClass("label " + clazz)
   jQuery(label).css("font-size", "13px")
 
@@ -184,11 +184,14 @@ function create_version_label(version, clazz) {
   return td
 }
 
+function create_version_label_from_full_version(full_version, clazz) {
+  return create_version_label(full_version[0] + " - " + full_version[1], clazz)
+}
 
 /**
  * 
  */
-function create_overview_table_user_column_cell(recorded_acks, user, last_version) {
+function create_overview_table_user_column_cell(recorded_acks, user, last_version, all_versions) {
   let td = undefined
   let bigger_version = undefined
 
@@ -206,14 +209,23 @@ function create_overview_table_user_column_cell(recorded_acks, user, last_versio
   }
 
   if (bigger_version != undefined) {
+    // now extract extra info from all_version
+    let full_version = undefined
+    all_versions.forEach((version) => {
+      if (version[0] == bigger_version) {
+        full_version = version
+      }
+    })
+
     if (bigger_version != last_version[0]) {
-      td = create_version_label(bigger_version, "label-danger")
+      td = create_version_label_from_full_version(full_version, "label-danger")
     } else {
-      td = create_version_label(bigger_version, "label-success")
+      td = create_version_label_from_full_version(full_version, "label-success")
     }
   } else {
     td = create_version_label("None", "label-danger")
   }
+
 
   return td
 }
