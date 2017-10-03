@@ -3,12 +3,24 @@
 // HTML INJECTOR SHORTCODE
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-add_shortcode('html-include', 'include_html'); 
+add_shortcode('include-html', 'include_html');
+
+function show_danger_alert($message) {
+	?>
+	<div class="alert alert-danger">
+  	<strong>[include-html]</strong> <?php echo $message ?>
+	</div>
+	<?php
+}
+
 
 function include_html($attrs) {
-	//TODO here load html content and render
-	log_me($attrs);
-	return "TODO THIS IS A RENDERED HTML CODE FROM [include-html] SHORTCODE";
+  if (is_null($attrs[WPIH_SHORTCODE_PARAM_URL])) {
+    show_danger_alert("Field '" . WPIH_SHORTCODE_PARAM_URL . "' not specified");
+    return;
+  }
+
+  return '<div id = "' . WPIH_CONTAINER_ELEMENT_ID . '" url="' . $attrs[WPIH_SHORTCODE_PARAM_URL] . '"> TEST </div>';
 }
 
 // Filter Functions with Hooks
@@ -28,7 +40,7 @@ add_action('admin_head', 'html_include_shortcode_button');
 
 // Function for new button
 function load_html_inject_js( $plugin_array ) {
-  $plugin_array['html_include_shortcode_button'] = plugin_dir_url(__FILE__) .'/js/html-inject.js';
+  $plugin_array['html_include_shortcode_button'] = plugin_dir_url(__FILE__) .'/js/wpih-shortcode-button.js';
   return $plugin_array;
 }
 

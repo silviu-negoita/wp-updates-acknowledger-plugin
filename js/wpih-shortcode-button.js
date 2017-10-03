@@ -1,3 +1,6 @@
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WORDPRESS INCLUDE HTML SHORTCODE ADMIN BUTTON
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 (function() {
     tinymce.PluginManager.add('html_include_shortcode_button', function(editor, url) {
         editor.addButton('html_include_shortcode_button', {
@@ -8,22 +11,14 @@
                     title: "Include html properties",
                     body: [{
                         type: 'textbox',
-                        name: 'repository',
-                        label: 'Repository',
-                        value: ''
-                    },
-                    {
-                        type: 'textbox',
-                        name: 'filepath',
-                        label: 'File path',
+                        name: 'url',
+                        label: 'URL',
                         value: ''
                     }],
                     onsubmit: function(e) {
                         editor.insertContent(
-                            '[html-include repository="' +
-                            e.data.repository + '" '
-                            + 'filepath="' + e.data.filepath + 
-                            '"]' 
+                            '[include-html url="' +
+                            e.data.url + '"]' 
                         );
                     }
                 });

@@ -5,14 +5,14 @@
    Note: This plugin aggregates an existing plugin called "Js Dom Customizer"
  * Author: Silviu Negoita, Anca Barbu
  * Author URI: https://github.com/silviu-negoita
- * Version: 2.4.3
+ * Version: 2.5.1
  */
 
 include_once "wordpress-updates-acknowledger-common-utils.php";
 include_once "wordpress-updates-acknowledger-overview-content.php";
 // load old 'Js Dom Customizer' plugin
 include_once "wordpress-dom-customizer.php";
-include_once "wordpress-html-inject-shorcode.php";
+include_once "wordpress-include-html-shorcode.php";
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // PLUGIN PART
@@ -44,6 +44,8 @@ function register_constants($jsInit) {
     define('LOGGED_USER_PARAMETER_NAME', "loggedUserParameterName");
     define('IS_ADMIN_LOGGED_USER', "isAdminLoggedParameterName");
     define('RELATIVE_SITE_URL', get_site_url(null, null, 'relative'));
+    define('WPIH_CONTAINER_ELEMENT_ID', 'wphi-container-element-id');
+    define('WPIH_SHORTCODE_PARAM_URL', 'url');
   }
 
   // now link them to JS part. conisder to replace with a method
@@ -62,7 +64,8 @@ function register_constants($jsInit) {
               IS_ADMIN_LOGGED_USER : "<?php echo current_user_can('administrator') ?>",
               RELATIVE_SITE_URL : "<?php echo RELATIVE_SITE_URL ?>",
               WPUA_OVERVIEW_PAGE_CONTAINER_ID : "<?php echo WPUA_OVERVIEW_PAGE_CONTAINER_ID ?>",
-              REST_OVERVIEW_PAGE_RESULT_CATEGORIES_FIELD : "<?php echo REST_OVERVIEW_PAGE_RESULT_CATEGORIES_FIELD ?>"
+              REST_OVERVIEW_PAGE_RESULT_CATEGORIES_FIELD : "<?php echo REST_OVERVIEW_PAGE_RESULT_CATEGORIES_FIELD ?>",
+              WPIH_CONTAINER_ELEMENT_ID : "<?php echo WPIH_CONTAINER_ELEMENT_ID ?>"
           }
       </script>
       <?php
@@ -82,6 +85,7 @@ function wpua_init() {
   loadJsDependency('loadJsDependency', 'js/wpua-side-widget.js');
   loadJsDependency('float-thead-js', 'js/float-thead.js');
   loadJsDependency('wpua-overview-widget', 'js/wpua-overview-content.js');
+  loadJsDependency('wpih-main', 'js/wpih-main.js');
 }
 
 add_action('wp_enqueue_scripts', 'wpua_init');
@@ -236,10 +240,13 @@ class wp_my_plugin extends WP_Widget {
     //extract($args);
     // these are the widget options
     $title = apply_filters('widget_title', $instance['title']);
+    if (is_null($title)) {
+      return;
+    }
     echo $args['before_widget'];
     // Display the widget
 ?>
-    <div class="panel-heading"><?php echo $instance[title] ?></div>
+    <div class="panel-heading"><?php echo $instance['title'] ?></div>
     <div  id="<?php echo WIDGET_BODY_ID ?>"
       <?php echo ARTICLE_PARAMETER_NAME ?> = "<?php echo get_the_ID() ?>" 
       class="panel-body" style="overflow-x: auto;" >
