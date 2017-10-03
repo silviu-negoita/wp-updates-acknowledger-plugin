@@ -36,10 +36,13 @@ function render_widget(data, responseCode) {
     // this is the case of first usage of the widget
     recordedAcks = []
   }
-
+ 
   if (allVersions == undefined) {
     widgetBody.appendChild(create_warning_content())
   } else {
+    let extra_information = document.createElement("i")
+    extra_information.innerHTML = "Hint: click on a version label to start cycling over the change tags."
+    widgetBody.appendChild(extra_information)
     widgetBody.appendChild(create_ack_table(allVersions, allUsers, recordedAcks))
   }
 
@@ -262,6 +265,9 @@ function create_warning_content() {
   let day = ("0" + now.getDate()).slice(-2);
   let month = ("0" + (now.getMonth() + 1)).slice(-2);
   let today = now.getFullYear() + "-" + (month) + "-" + (day);
-  alert.innerHTML = "No versions found for this article. Use custom field <code>wpua_article_versions</code> to declare them. e.g.<p><code>[[\"v1.0\", \"" + today +"\"]]</code></p>";
+  alert.innerHTML = "<p>There are no versions defined yet.</p>"+
+    "<p>Please add a new custom field of type <code>wpua_article_versions</code> with value:</p>" + 
+    "<p><code>[[\"v1.0\", \"" + today +"\"]]</code></p>" + 
+    "<p> <i>Hint: triple click to select the line above for copy/paste</i> </p>";
   return alert
 }
