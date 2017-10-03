@@ -22,9 +22,9 @@ function findPos(obj) {
 // knows how to navigate to the next element with the same class "new-v*" as the current `element`
 function goToNext(element, withParent) {
 	// jQuery selector - by specific class new-v*
-	var classAttr = withParent ? element.parentElement.classList[2] : element.classList[2];
-	var classSelector = jQuery("." + classAttr.replace(/\./g, "\\."));
-	var indexOfEnclosingSpan = classSelector.index(jQuery(element.parentElement));
+	element = withParent ? element.parentElement : element;
+	var classSelector = jQuery("." + element.classList[2].replace(/\./g, "\\."));
+	var indexOfEnclosingSpan = classSelector.index(jQuery(element));
 	// retrieve next span element with specific class
 	var nextElement = classSelector.slice(indexOfEnclosingSpan+1).first();
 	
@@ -32,15 +32,42 @@ function goToNext(element, withParent) {
 	jQuery('span#next').removeAttr('id');
 	
 	// add `next` id to the next element that we have to navigate to
-	// if there is no such element, then it navigates to the  first
+	// if there is no such element, then it navigates to the first
 	if (nextElement.length == 0) {
 		classSelector.first().attr("id", "next");
 	} else {
 		nextElement.attr("id", "next");
 	}
 	
-	var elementPos = findPos(document.getElementById("next")) - (screen.height/30);
-	window.scroll(0, elementPos);
+	// the element from the side widget is always on the last position in our classSelector
+	// since the user starts navigating from it, in the interface, we consider the last element, actually, the penultimate (classSelector.length - 2)
+	if (classSelector.length >= 2 && indexOfEnclosingSpan ==  classSelector.length - 2) {
+		showBSModal({
+			title: "Version end",
+			body: "You have reached the last label for this version. Do you want to go back to the beginning of the document?",
+			size: "small",
+			actions: [
+				{
+					label: 'Confirm',
+					cssClass: 'btn-success',
+					onClick: function(e){
+						jQuery(e.target).parents('.modal').modal('hide');
+						window.scroll(0, 0);
+					}
+				},
+				{
+					label: 'Cancel',
+					cssClass: 'btn-danger',
+					onClick: function(e){
+						jQuery(e.target).parents('.modal').modal('hide');
+					}
+				}
+			]
+		});
+	} else {
+		var elementPos = findPos(document.getElementById("next")) - (screen.height/30);
+		window.scroll(0, elementPos);
+	}
 }
 
 function labelManage() {
@@ -63,7 +90,7 @@ function labelManage() {
         // string that will retain the progressive replacement of the versions declarations with nice bootstrap spans
         var replaced = textToSearch;
 
-        var anchorHTML = ' (<a style="color: white;  text-decoration: underline; cursor: pointer" onclick="goToNext(this, true)">go to next</a>)';
+        var anchorHTML = ' (<a style="color: white; text-decoration: underline; cursor: pointer" onclick="goToNext(this, true)">go to next</a>)';
         // two versions
         if (latestStringVersion1 != undefined && versionsArray.length > 1) {
 			var versionRegexp2 = /v(.*)/g;
@@ -96,7 +123,7 @@ function labelManage() {
 
             // where index is different from (negative lookahead) last version, replace with a discrete span containing version number (v$2)
 			// another small hack: sometimes we find in text strings like this <p>NEW v4.2></p> and we do not have to take into our capture group "</p>"
-            newVRegexp = new RegExp('(NEW v((?!' + latestStringVersion1 + ').*?)<\/p>?)\\s+', "g");
+            newVRegexp = new RegExp('(NEW v((?!' + latestStringVersion1 + ').*?)(<\/p>)?)\\s+', "g");
             replaced = replaced.replace(newVRegexp, '<span style="font-size: x-small" class="label label-default new-v$2">v$2' + anchorHTML + '</span> ');
 
             // when versions declaration did not respect the versionRegexp pattern	
@@ -129,4 +156,51 @@ jQuery(document).ready(function () {
 	labelManage();
 });
 
+// source: https://raw.githubusercontent.com/mohdovais/utilities/master/bootstrap.model.wrapper.js
+window.showBSModal = function self(options) {
 
+    var options = jQuery.extend({
+            title : '',
+            body : '',
+            remote : false,
+            backdrop : 'static',
+            size : false,
+            onShow : false,
+            onHide : false,
+            actions : false
+        }, options);
+
+    self.onShow = typeof options.onShow == 'function' ? options.onShow : function () {};
+    self.onHide = typeof options.onHide == 'function' ? options.onHide : function () {};
+
+    if (self.$modal == undefined) {
+        self.$modal = jQuery('<div class="modal fade"><div class="modal-dialog"><div class="modal-content"></div></div></div>').appendTo('body');
+        self.$modal.on('shown.bs.modal', function (e) {
+            self.onShow.call(this, e);
+        });
+        self.$modal.on('hidden.bs.modal', function (e) {
+            self.onHide.call(this, e);
+        });
+    }
+
+    var modalClass = {
+        small : "modal-sm",
+        large : "modal-lg"
+    };
+
+    self.$modal.data('bs.modal', false);
+    self.$modal.find('.modal-dialog').removeClass().addClass('modal-dialog ' + (modalClass[options.size] || ''));
+    self.$modal.find('.modal-content').html('<div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title">jQuery{title}</h4></div><div class="modal-body">jQuery{body}</div><div class="modal-footer"></div>'.replace('jQuery{title}', options.title).replace('jQuery{body}', options.body));
+
+    var footer = self.$modal.find('.modal-footer');
+    if (Object.prototype.toString.call(options.actions) == "[object Array]") {
+        for (var i = 0, l = options.actions.length; i < l; i++) {
+            options.actions[i].onClick = typeof options.actions[i].onClick == 'function' ? options.actions[i].onClick : function () {};
+            jQuery('<button type="button" class="btn ' + (options.actions[i].cssClass || '') + '">' + (options.actions[i].label || '{Label Missing!}') + '</button>').appendTo(footer).on('click', options.actions[i].onClick);
+        }
+    } else {
+        jQuery('<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>').appendTo(footer);
+    }
+
+    self.$modal.modal(options);
+}

@@ -286,3 +286,8 @@ function overview_widget_shortcode($attrs) {
     return '<div id="wpua_overview_page_container_id"></div>';
 }
 add_shortcode('overview_page', 'overview_widget_shortcode'); 
+
+function html5_shower_presentation($attrs) {
+    return '<div id="html5-presentation-button" class="alert alert-danger"> <button type="button" class="btn btn-danger" onclick="openPresentation()"><i class="glyphicon glyphicon-eye-open"></i> <span class="text">  Open as presentation </span></button></div>';
+}
+add_shortcode('html5-presentation', 'html5_shower_presentation');
