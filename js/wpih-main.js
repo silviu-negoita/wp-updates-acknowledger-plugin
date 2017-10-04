@@ -1,43 +1,45 @@
 jQuery(document).ready(() => {
-  jQuery("#" + WPUAConstants.WPIH_CONTAINER_ELEMENT_ID).ready(() => {
-    get_html_content_by_url(jQuery("#" + WPUAConstants.WPIH_CONTAINER_ELEMENT_ID).attr(WPUAConstants.WPIH_SHORTCODE_PARAM_URL))
+  jQuery("." + WPUAConstants.WPIH_CONTAINER_CLASS).ready(() => {
+    // now get each include-html container and process itfor
+    jQuery("." + WPUAConstants.WPIH_CONTAINER_CLASS).get().forEach((include_html_container) => {
+      include_html_in_container(include_html_container)
+    })
   });
 })
 
-function attach_element_to_wpih_contaner(element) {
-  jQuery("#" + WPUAConstants.WPIH_CONTAINER_ELEMENT_ID).get(0).appendChild(element)
-}
-
-function get_html_content_by_url(url) {
+function include_html_in_container(include_html_container) {
+  let url = jQuery(include_html_container).attr(WPUAConstants.WPIH_SHORTCODE_PARAM_URL)
   if(url == undefined) {
     return
   }
-  var xhr= new XMLHttpRequest();
+  let xhr= new XMLHttpRequest();
   xhr.open('GET', url, true);
+  // small trick to show only one rror message, because onreadystatechange enters multiple time for only 1 call
+  let error_treated = false;
   xhr.onreadystatechange= function() {
       if (this.readyState == 4 && this.status==200) {
-        send_html_content_to_process(this.responseText);
-      } else if (this.status != 200) {
-        attach_element_to_wpih_contaner(create_alert("Could not load URL: <code>" + url + "</code>.<p><b> Notice: Currently we suport loading html only for csp-dev-tools domain<b></p>", "alert-danger"))
+        send_html_content_to_process(this.responseText, include_html_container);
+      } else if (this.status !==200 && !error_treated) {
+        include_html_container.appendChild(create_alert("Could not load URL: <code>" + url + "</code>.<p><b> Notice: Currently we suport loading html only for csp-dev-tools domain<b></p>", "alert-danger"))
+        error_treated = true
       }
   };
   xhr.send();
 }
 
-function send_html_content_to_process(html_content) {
-  params = {}
+function send_html_content_to_process(html_content, include_html_container) {
+  var params = {}
 
   params[WPUAConstants.WPIH_SHORTCODE_PARAM_HTML_CONTENT] = encodeURI(html_content)
 
-  make_server_request("POST", "/wp-json/wpua/api/process_html_content", params, include_html_content, on_error_callback)
-}
-
-function include_html_content(response) {
-  to_attach = response
-  to_attach = to_attach.replace(/\\"/g, '"');
-  jQuery("#" + WPUAConstants.WPIH_CONTAINER_ELEMENT_ID).get(0).innerHTML = to_attach
-}
-
-function on_error_callback(error) {
-  //TODO
+  make_server_request(
+    "POST", 
+    "/wp-json/wpua/api/process_html_content", 
+    params, 
+    (response) => {
+       include_html_container.innerHTML = response
+    }, 
+    (error_response) => {
+      include_html_container.appendChild(create_alert("Could not process html from URL: " + jQuery(include_html_container).attr(WPUAConstants.WPIH_SHORTCODE_PARAM_URL) + " Reason: " + error_response, "alert-danger"))
+    })
 }

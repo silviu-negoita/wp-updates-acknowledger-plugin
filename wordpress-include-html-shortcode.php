@@ -56,15 +56,13 @@ function process_html_content($requst) {
 
 add_shortcode('include-html', 'include_html');
 
-register_for_button_rendering("html_include_shortcode_button", "/js/wpih-shortcode-button.js");
-
-$GLOBALS['wpih_shortcute_index'] = 0
+register_for_button_rendering("html_include_shortcode_button", "/js/shortcode_buttons/wpih-shortcode-button.js");
 
 function include_html($attrs) {
+  $GLOBALS['wpih_shortcute_index']  = $GLOBALS['wpih_shortcute_index']  + 1;
   if (is_null($attrs[WPIH_SHORTCODE_PARAM_URL])) {
     show_danger_alert("Field '" . WPIH_SHORTCODE_PARAM_URL . "' not specified");
     return;
   }
-  log_me("enters");
-  return '<div id = "' . $GLOBALS['wpih_shortcute_index'] . ' id="wpih_id' . $GLOBALS['wpih_shortcute_index'] . '" url="' . $attrs[WPIH_SHORTCODE_PARAM_URL] . '"></div>';
+  return '<div class ="' . WPIH_SCONTAINER_CLASS . '" url="' . $attrs[WPIH_SHORTCODE_PARAM_URL] . '"></div>';
 }

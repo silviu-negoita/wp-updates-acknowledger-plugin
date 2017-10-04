@@ -5,15 +5,15 @@
    Note: This plugin aggregates an existing plugin called "Js Dom Customizer"
  * Author: Silviu Negoita, Anca Barbu
  * Author URI: https://github.com/silviu-negoita
- * Version: 2.6.2
+ * Version: 2.7.1
  */
 
 include_once "wordpress-updates-acknowledger-common-utils.php";
 include_once "wordpress-updates-acknowledger-overview-content.php";
 // load old 'Js Dom Customizer' plugin
 include_once "wordpress-dom-customizer.php";
-include_once "wordpress-include-html-shorcode.php";
-include_once "wordpress-include-html5-shower-presentation-shortcode.php";
+include_once "wordpress-include-html-shortcode.php";
+include_once "wordpress-html5-shower-presentation-shortcode.php";
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // PLUGIN PART
@@ -45,11 +45,9 @@ function register_constants($jsInit) {
     define('LOGGED_USER_PARAMETER_NAME', "loggedUserParameterName");
     define('IS_ADMIN_LOGGED_USER', "isAdminLoggedParameterName");
     define('RELATIVE_SITE_URL', get_site_url(null, null, 'relative'));
-    // marked for deletion
-    define('WPIH_CONTAINER_ELEMENT_ID', 'wphi-container-element-id');
     define('WPIH_SHORTCODE_PARAM_URL', 'url');
     define('WPIH_SHORTCODE_PARAM_HTML_CONTENT', 'html_content');
-    define('WPIH_SCONTAINER_CLASS', 'wpih_class');
+    define('WPIH_CONTAINER_CLASS', 'wpih_class');
   }
 
   // now link them to JS part. conisder to replace with a method
@@ -69,7 +67,7 @@ function register_constants($jsInit) {
               RELATIVE_SITE_URL : "<?php echo RELATIVE_SITE_URL ?>",
               WPUA_OVERVIEW_PAGE_CONTAINER_ID : "<?php echo WPUA_OVERVIEW_PAGE_CONTAINER_ID ?>",
               REST_OVERVIEW_PAGE_RESULT_CATEGORIES_FIELD : "<?php echo REST_OVERVIEW_PAGE_RESULT_CATEGORIES_FIELD ?>",
-              WPIH_CONTAINER_ELEMENT_ID : "<?php echo WPIH_CONTAINER_ELEMENT_ID ?>",
+              WPIH_CONTAINER_CLASS : "<?php echo WPIH_SCONTAINER_CLASS ?>",
               WPIH_SHORTCODE_PARAM_URL : "<?php echo WPIH_SHORTCODE_PARAM_URL ?>",
               WPIH_SHORTCODE_PARAM_HTML_CONTENT : "<?php echo WPIH_SHORTCODE_PARAM_HTML_CONTENT ?>"
           }
@@ -161,7 +159,7 @@ function get_all_users_with_custom_first($logged_user) {
 /**
  * It updates the article custom field where all data is stored
  */
-function savePreferences($request) {
+function save_preferences($request) {
   $article_id = $_POST[ARTICLE_PARAMETER_NAME];
   $date_field_value = json_encode($_POST[ARTICLE_DATA_FIELD_VALUE]);
   update_post_meta($article_id, WPUA_DATA_FIELD_KEY, $date_field_value);
@@ -181,7 +179,7 @@ function register_api_routes() {
 
   register_rest_route('wpua/api/', '/savePreferences', array(
     'methods' => 'POST',
-    'callback' => 'savePreferences',
+    'callback' => 'save_preferences',
   ));
 
   register_rest_route('wpua/api/', '/getOverviewData', array(
