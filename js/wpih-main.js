@@ -40,6 +40,6 @@ function send_html_content_to_process(html_content, include_html_container) {
        include_html_container.innerHTML = response
     }, 
     (error_response) => {
-      include_html_container.appendChild(create_alert("Could not process html from URL: " + jQuery(include_html_container).attr(WPUAConstants.WPIH_SHORTCODE_PARAM_URL) + " Reason: " + error_response, "alert-danger"))
+      include_html_container.appendChild(create_alert("Server error: Could not process html from URL: " + jQuery(include_html_container).attr(WPUAConstants.WPIH_SHORTCODE_PARAM_URL), "alert-danger"))
     })
 }

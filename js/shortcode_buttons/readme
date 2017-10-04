@@ -1,0 +1,1 @@
+Using tinyMCE for our shorcodes, it forces us to have each actual js button delcared in separate file.
