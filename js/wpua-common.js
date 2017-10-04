@@ -23,7 +23,7 @@ var Wpua_Hook = {
 /*
 * Generic method to make requests to server. Kepp in mind that this method populates in params article_id or logged_user if exists in wpua context.
 */
-function make_server_request(request_type, request_uri, params, callback) {
+function make_server_request(request_type, request_uri, params, success_callback, errror_callback = null, dataType = "json") {
   var widgetBody = document.getElementById(WPUAConstants.WIDGET_BODY_ID)
   if(widgetBody == undefined) {
     return
@@ -31,6 +31,7 @@ function make_server_request(request_type, request_uri, params, callback) {
 
   var articleId = widgetBody.getAttribute(WPUAConstants.ARTICLE_PARAMETER_NAME)
   var loggedUser = WPUAConstants.LOGGED_USER
+  
   if (params == undefined) {
     params = {}
   }
@@ -40,11 +41,19 @@ function make_server_request(request_type, request_uri, params, callback) {
   jQuery.ajax({
     type: request_type,
     url: WPUAConstants.RELATIVE_SITE_URL + request_uri,
-    dataType: "json",
+    dataType: dataType,
     data: params,
-    success: callback,
-    error: function(xhr, ajaxOptions, thrownError) {
+    success: success_callback,
+    error: !(errror_callback == undefined) ? errror_callback : function(xhr, ajaxOptions, thrownError) {
       console.log(xhr, ajaxOptions, thrownError)
     }
   });
+}
+
+function create_alert(message, clazz) {
+  alert = document.createElement("div")
+  jQuery(alert).addClass("alert")
+  jQuery(alert).addClass(clazz)
+  alert.innerHTML = message 
+  return alert
 }

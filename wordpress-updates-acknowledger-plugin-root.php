@@ -5,7 +5,7 @@
    Note: This plugin aggregates an existing plugin called "Js Dom Customizer"
  * Author: Silviu Negoita, Anca Barbu
  * Author URI: https://github.com/silviu-negoita
- * Version: 2.5.2
+ * Version: 2.5.3
  */
 
 include_once "wordpress-updates-acknowledger-common-utils.php";
@@ -46,6 +46,7 @@ function register_constants($jsInit) {
     define('RELATIVE_SITE_URL', get_site_url(null, null, 'relative'));
     define('WPIH_CONTAINER_ELEMENT_ID', 'wphi-container-element-id');
     define('WPIH_SHORTCODE_PARAM_URL', 'url');
+    define('WPIH_SHORTCODE_PARAM_HTML_CONTENT', 'html_content');
   }
 
   // now link them to JS part. conisder to replace with a method
@@ -65,7 +66,9 @@ function register_constants($jsInit) {
               RELATIVE_SITE_URL : "<?php echo RELATIVE_SITE_URL ?>",
               WPUA_OVERVIEW_PAGE_CONTAINER_ID : "<?php echo WPUA_OVERVIEW_PAGE_CONTAINER_ID ?>",
               REST_OVERVIEW_PAGE_RESULT_CATEGORIES_FIELD : "<?php echo REST_OVERVIEW_PAGE_RESULT_CATEGORIES_FIELD ?>",
-              WPIH_CONTAINER_ELEMENT_ID : "<?php echo WPIH_CONTAINER_ELEMENT_ID ?>"
+              WPIH_CONTAINER_ELEMENT_ID : "<?php echo WPIH_CONTAINER_ELEMENT_ID ?>",
+              WPIH_SHORTCODE_PARAM_URL : "<?php echo WPIH_SHORTCODE_PARAM_URL ?>",
+              WPIH_SHORTCODE_PARAM_HTML_CONTENT : "<?php echo WPIH_SHORTCODE_PARAM_HTML_CONTENT ?>"
           }
       </script>
       <?php
@@ -186,6 +189,11 @@ function register_api_routes() {
   register_rest_route('wpua/api/', '/getArticleVersions', array(
     'methods' => 'GET',
     'callback' => 'get_article_versions',
+  ));
+
+  register_rest_route('wpua/api/', '/process_html_content', array(
+    'methods' => 'POST',
+    'callback' => 'process_html_content',
   ));
 }
 
