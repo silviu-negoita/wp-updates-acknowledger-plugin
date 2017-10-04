@@ -2,6 +2,9 @@
 /**
  * Method usefull to debug
  */
+ 
+$GLOBALS['buttons_registry_array'] = [];
+
 function log_me($message) {
   if (WP_DEBUG === true) {
     if (is_array($message) || is_object($message)) {
@@ -36,4 +39,40 @@ function get_single_post_meta($article_id, $key) {
     return;
   } 
   return $result;
+}
+
+
+// Filter Functions with Hooks
+function load_resources_for_shortcode_buttons() {
+  // Check if user have permission
+  if ( !current_user_can( 'edit_posts' ) && !current_user_can( 'edit_pages' ) ) {
+    return;
+  }
+
+  // Check if WYSIWYG is enabled
+  if ( 'true' == get_user_option( 'rich_editing' ) ) {
+    add_filter( 'mce_external_plugins', 'load_html_inject_js' );
+    add_filter( 'mce_buttons', 'register_buttons' );
+  }
+}
+add_action('admin_head', 'load_resources_for_shortcode_buttons');
+
+// Function for shortcode buttons
+function load_html_inject_js($plugin_array ) {
+	foreach ($GLOBALS['buttons_registry_array'] as $key => $value) {
+		$plugin_array[$key] = plugin_dir_url(__FILE__) .$value;
+	}
+	return $plugin_array;
+}
+
+// Register buttons in the editor
+function register_buttons($buttons) {
+	foreach ($GLOBALS['buttons_registry_array'] as $key => $value) {
+		array_push($buttons, $key);
+	}
+  return $buttons;
+}
+
+function register_for_button_rendering($jsButtonName, $jsFile){
+	$GLOBALS['buttons_registry_array'][$jsButtonName] = $jsFile;
 }

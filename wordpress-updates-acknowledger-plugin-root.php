@@ -5,7 +5,7 @@
    Note: This plugin aggregates an existing plugin called "Js Dom Customizer"
  * Author: Silviu Negoita, Anca Barbu
  * Author URI: https://github.com/silviu-negoita
- * Version: 2.5.2
+ * Version: 2.6.0
  */
 
 include_once "wordpress-updates-acknowledger-common-utils.php";
@@ -13,6 +13,7 @@ include_once "wordpress-updates-acknowledger-overview-content.php";
 // load old 'Js Dom Customizer' plugin
 include_once "wordpress-dom-customizer.php";
 include_once "wordpress-include-html-shorcode.php";
+include_once "wordpress-include-html5-shower-presentation-shortcode.php";
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // PLUGIN PART
@@ -286,8 +287,3 @@ function overview_widget_shortcode($attrs) {
     return '<div id="wpua_overview_page_container_id"></div>';
 }
 add_shortcode('overview_page', 'overview_widget_shortcode'); 
-
-function html5_shower_presentation($attrs) {
-    return '<div id="html5-presentation-button" class="alert alert-danger"> <button type="button" class="btn btn-danger" onclick="openPresentation()"><i class="glyphicon glyphicon-eye-open"></i> <span class="text">  Open as presentation </span></button></div>';
-}
-add_shortcode('html5-presentation', 'html5_shower_presentation');
