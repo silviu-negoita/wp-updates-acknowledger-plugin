@@ -3,8 +3,6 @@
  * Method usefull to debug
  */
  
-$GLOBALS['buttons_registry_array'] = [];
-
 function log_me($message) {
   if (WP_DEBUG === true) {
     if (is_array($message) || is_object($message)) {
