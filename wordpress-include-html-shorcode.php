@@ -8,17 +8,17 @@
 * Callback from REST controller which returns an html body from given url
 */
 function load_external_html_body($request) {
-   $html_url = $_GET[WPIH_SHORTCODE_PARAM_URL];
-
-  $d = new DOMDocument;
-  $mock = new DOMDocument;
-  $d->loadHTML(file_get_contents($html_url));
-  $body = $d->getElementsByTagName('body')->item(0);
-  foreach ($body->childNodes as $child){
-    $mock->appendChild($mock->importNode($child, true));
-  }
-
-  return $mock->saveHTML();
+  return tidy_repair_string($request,array(
+                           'indent'         => true,
+                           'output-html'   => true,
+                           'wrap'           => 80,
+                           'show-body-only' => true,
+                           'clean' => true,
+                           'input-encoding' => 'utf8',
+                           'output-encoding' => 'utf8',
+                           'logical-emphasis' => false,
+                           'bare' => true,
+                            ));
 }
 
 function show_danger_alert($message) {
@@ -28,8 +28,6 @@ function show_danger_alert($message) {
 	</div>
 	<?php
 }
-
-
 
 function get_html_body_from_full_html_content($full_html_content) {
   $d = new DOMDocument;
@@ -60,11 +58,13 @@ add_shortcode('include-html', 'include_html');
 
 register_for_button_rendering("html_include_shortcode_button", "/js/wpih-shortcode-button.js");
 
+$GLOBALS['wpih_shortcute_index'] = 0
+
 function include_html($attrs) {
   if (is_null($attrs[WPIH_SHORTCODE_PARAM_URL])) {
     show_danger_alert("Field '" . WPIH_SHORTCODE_PARAM_URL . "' not specified");
     return;
   }
-
-  return '<div id = "' . WPIH_CONTAINER_ELEMENT_ID . '" url="' . $attrs[WPIH_SHORTCODE_PARAM_URL] . '"></div>';
+  log_me("enters");
+  return '<div id = "' . $GLOBALS['wpih_shortcute_index'] . ' id="wpih_id' . $GLOBALS['wpih_shortcute_index'] . '" url="' . $attrs[WPIH_SHORTCODE_PARAM_URL] . '"></div>';
 }

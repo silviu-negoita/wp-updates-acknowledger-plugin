@@ -5,7 +5,7 @@
    Note: This plugin aggregates an existing plugin called "Js Dom Customizer"
  * Author: Silviu Negoita, Anca Barbu
  * Author URI: https://github.com/silviu-negoita
- * Version: 2.6.0
+ * Version: 2.6.2
  */
 
 include_once "wordpress-updates-acknowledger-common-utils.php";
@@ -45,9 +45,11 @@ function register_constants($jsInit) {
     define('LOGGED_USER_PARAMETER_NAME', "loggedUserParameterName");
     define('IS_ADMIN_LOGGED_USER', "isAdminLoggedParameterName");
     define('RELATIVE_SITE_URL', get_site_url(null, null, 'relative'));
+    // marked for deletion
     define('WPIH_CONTAINER_ELEMENT_ID', 'wphi-container-element-id');
     define('WPIH_SHORTCODE_PARAM_URL', 'url');
     define('WPIH_SHORTCODE_PARAM_HTML_CONTENT', 'html_content');
+    define('WPIH_SCONTAINER_CLASS', 'wpih_class');
   }
 
   // now link them to JS part. conisder to replace with a method
