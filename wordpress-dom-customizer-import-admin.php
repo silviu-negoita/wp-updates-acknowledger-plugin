@@ -15,7 +15,7 @@
     </form>
 </div>
 
-<?php 
+<?php
     if($_POST['wp_customizer_hidden'] == 'Y') {
         //Form data sent
 		$root = $_POST['root'];
