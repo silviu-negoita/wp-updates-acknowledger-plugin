@@ -23,3 +23,4 @@ function include_html($attrs) {
 
   return '<div id = "' . WPIH_CONTAINER_ELEMENT_ID . '" url="' . $attrs[WPIH_SHORTCODE_PARAM_URL] . '"> TEST </div>';
 }
+?>

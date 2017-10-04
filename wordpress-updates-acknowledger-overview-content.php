@@ -44,4 +44,4 @@ function getOverviewData($request) {
   $result[REST_WIDGET_RESULT_DATA_ALL_USERS_FIELD] = get_all_users_with_custom_first($_GET[LOGGED_USER_PARAMETER_NAME]);
   return $result;
 }
-
+?>

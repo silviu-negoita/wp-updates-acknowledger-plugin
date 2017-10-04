@@ -5,7 +5,7 @@
    Note: This plugin aggregates an existing plugin called "Js Dom Customizer"
  * Author: Silviu Negoita, Anca Barbu
  * Author URI: https://github.com/silviu-negoita
- * Version: 2.6.0
+ * Version: 2.6.1
  */
 
 include_once "wordpress-updates-acknowledger-common-utils.php";
@@ -286,4 +286,5 @@ add_action( 'add_post_metadata', 'update_postmeta_hook', 10, 4 );
 function overview_widget_shortcode($attrs) {
     return '<div id="wpua_overview_page_container_id"></div>';
 }
-add_shortcode('overview_page', 'overview_widget_shortcode'); 
+add_shortcode('overview_page', 'overview_widget_shortcode');
+?>

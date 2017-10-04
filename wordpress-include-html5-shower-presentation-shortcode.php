@@ -6,4 +6,3 @@ function html5_shower_presentation($attrs) {
     return '<div id="html5-presentation-button" class="alert alert-danger"> <button type="button" class="btn btn-danger" onclick="openPresentation()"><i class="glyphicon glyphicon-eye-open"></i> <span class="text">  Open as presentation </span></button></div>';
 }
 ?>
-

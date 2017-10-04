@@ -3,6 +3,7 @@
  * Method usefull to debug
  */
  
+
 function log_me($message) {
   if (WP_DEBUG === true) {
     if (is_array($message) || is_object($message)) {
@@ -74,3 +75,4 @@ function register_buttons($buttons) {
 function register_for_button_rendering($jsButtonName, $jsFile){
 	$GLOBALS['buttons_registry_array'][$jsButtonName] = $jsFile;
 }
+?>
