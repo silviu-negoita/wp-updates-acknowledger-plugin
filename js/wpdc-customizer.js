@@ -1,4 +1,5 @@
 var selectorsToBeRemoved = ["#main > div.well.author-meta", "#main > p.hidden-xs", "#main > article> footer"];
+var versionsArray = [];
 
 function removeElems() {
 	// itterate through selectors array an remove them from DOM
@@ -23,7 +24,8 @@ function findPos(obj) {
 function goToNext(element, withParent) {
 	// jQuery selector - by specific class new-v*
 	element = withParent ? element.parentElement : element;
-	var classSelector = jQuery("." + element.classList[2].replace(/\./g, "\\."));
+	var classString = element.classList[2];
+	var classSelector = jQuery("." + classString.replace(/\./g, "\\."));
 	var indexOfEnclosingSpan = classSelector.index(jQuery(element));
 	// retrieve next span element with specific class
 	var nextElement = classSelector.slice(indexOfEnclosingSpan+1).first();
@@ -39,20 +41,23 @@ function goToNext(element, withParent) {
 		nextElement.attr("id", "next");
 	}
 	
+	// in case we have at least one element in the document and one in the side widget
 	// the element from the side widget is always on the last position in our classSelector
 	// since the user starts navigating from it, in the interface, we consider the last element, actually, the penultimate (classSelector.length - 2)
+	var completeVersionInfo = getVersionInfo(classString.replace("new-", ""));
 	if (classSelector.length >= 2 && indexOfEnclosingSpan ==  classSelector.length - 2) {
 		showBSModal({
-			title: "Version end",
-			body: "You have reached the last label for this version. Do you want to go back to the beginning of the document?",
+			title: "Reached the last change tag for " + completeVersionInfo,
+			body: "Do you want to restart from the first change tag?",
 			size: "small",
 			actions: [
 				{
 					label: 'Confirm',
 					cssClass: 'btn-success',
-					onClick: function(e){
+					onClick: function(e) {
 						jQuery(e.target).parents('.modal').modal('hide');
-						window.scroll(0, 0);
+						var elementPos = findPos(classSelector[0]) - (screen.height/30);
+						window.scroll(0, elementPos);
 					}
 				},
 				{
@@ -64,16 +69,34 @@ function goToNext(element, withParent) {
 				}
 			]
 		});
-	} else {
+	// in case only the element in the side widget has the specific class
+	} else if (classSelector.length == 1) {
+		showBSModal({
+			title: completeVersionInfo,
+			body: "There are no change tags in the document.",
+			size: "small",
+		});
+	}
+	else {
 		var elementPos = findPos(document.getElementById("next")) - (screen.height/30);
 		window.scroll(0, elementPos);
 	}
 }
 
+function getVersionInfo(versionString) {
+	var versionCompleteInfo = "";
+	versionsArray.forEach(function(version) {
+		if (versionString == version[0]) {
+			versionCompleteInfo = versionString + " - " + version[1];
+		}
+	});
+	return versionCompleteInfo;
+}
+
 function labelManage() {
     // retrieve the content of the article
     var textToSearch = jQuery('article').children('.entry-content')[0].innerHTML;
-    var versionArray = [];
+    
     make_server_request("GET", "/wp-json/wpua/api/getArticleVersions", {}, function(response) {
 		// obtain versions as an array of arrays, e.g: [["v1.1.1", "2017-15-26"], ["v1.2.1", "2017-15-25"], ["v1.3.2", "2017-15-25"]]
 		// they come ordered from server
