@@ -40,7 +40,7 @@ function make_server_request(request_type, request_uri, params, success_callback
 
   jQuery.ajax({
     type: request_type,
-    url: WPUAConstants.RELATIVE_SITE_URL + request_uri,
+    url: WPUAConstants.RELATIVE_SITE_URL + WPUAConstants.WPUA_API_ROUTE + request_uri,
     dataType: dataType,
     data: params,
     success: success_callback,

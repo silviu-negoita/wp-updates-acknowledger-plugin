@@ -1,3 +1,6 @@
+/*
+* Entry point
+*/
 jQuery(document).ready(function () {
     jQuery("#" + WPUAConstants.WIDGET_BODY_ID).ready(
       get_data_from_server(render_widget)
@@ -7,11 +10,11 @@ jQuery(document).ready(function () {
 function commit_ack_change(dataToCommit) {
   var params = {}
   params[WPUAConstants.ARTICLE_DATA_FIELD_VALUE] = dataToCommit
-  make_server_request("POST", "/wp-json/wpua/api/savePreferences", params)
+  make_server_request("POST", "save_preferences", params)
 }
 
 function get_data_from_server(callback) {
-  make_server_request("GET",  "/wp-json/wpua/api/load_wpua_widget_data", {}, callback);
+  make_server_request("GET",  "load_wpua_widget_data", {}, callback);
 }
 
 /**
@@ -47,7 +50,6 @@ function render_widget(data, responseCode) {
   }
 
 }
-
 
 function create_ack_table(allVersions, allUsers, recordedAcks) {
   tableElement = document.createElement("table")
@@ -258,16 +260,17 @@ function table_button_click_event_handler(buttonElement, recordedAcks) {
  * Create an alert which is shown when no versions are present in article
  */
 function create_warning_content() {
-  alert = document.createElement("div")
-  jQuery(alert).addClass("alert alert-info")
-  jQuery(alert).css('margin-bottom', '0px');
   let now = new Date();
   let day = ("0" + now.getDate()).slice(-2);
   let month = ("0" + (now.getMonth() + 1)).slice(-2);
   let today = now.getFullYear() + "-" + (month) + "-" + (day);
-  alert.innerHTML = "<p>There are no versions defined yet.</p>"+
+  alert_innerHTML = "<p>There are no versions defined yet.</p>"+
     "<p>Please add a new custom field of type <code>wpua_article_versions</code> with value:</p>" + 
     "<p><code>[[\"v1.0\", \"" + today +"\"]]</code></p>" + 
     "<p> <i>Hint: triple click to select the line above for copy/paste</i> </p>";
+
+  let alert = create_alert(alert_innerHTML, "alert-info")
+  jQuery(alert).css('margin-bottom', '0px');
+
   return alert
 }

@@ -1,4 +1,7 @@
 <?php
+/*
+* Contains all server logic of overview content(with all articles/categories and posts). See wpua-overview-content.js for client side.
+*/
 
 function get_parsed_categories() {
   $parsed_categories = array();
@@ -38,7 +41,47 @@ function process_cat_tree( $cat , $nesting_level,  &$parsed_categories) {
 	endif;
 }
 
-function getOverviewData($request) {
+function get_article_versions_internal($article_id) {
+  $all_versions_meta = get_single_post_meta($article_id, WPUA_ARTICLE_VERSIONS_KEY);
+  if (is_null($all_versions_meta)) {
+    return;
+  }
+  $all_versions = json_decode($all_versions_meta);
+  rsort($all_versions);
+  return $all_versions;
+}
+
+/*
+* Get all system users, with first element current logged user.
+*/
+function get_all_users_with_custom_first($logged_user) {
+   // set logged user first in result list
+  $all_users_except_current = get_users(array(
+    'fields' => array(
+      'display_name',
+      "ID"
+    ) ,
+    'exclude' => array(
+      $logged_user
+    )
+  ));
+  $current_users = get_users(array(
+    'fields' => array(
+      'display_name',
+      "ID"
+    ) ,
+    'include' => array(
+      $logged_user
+    )
+  ));
+  $all_users = array();
+  array_splice($all_users, 0, 0, $current_users);
+  array_splice($all_users, 1, 0, $all_users_except_current);
+
+  return $all_users;
+}
+
+function get_overview_data($request) {
   $result = array();
   $result[REST_OVERVIEW_PAGE_RESULT_CATEGORIES_FIELD] = get_parsed_categories();
   $result[REST_WIDGET_RESULT_DATA_ALL_USERS_FIELD] = get_all_users_with_custom_first($_GET[LOGGED_USER_PARAMETER_NAME]);

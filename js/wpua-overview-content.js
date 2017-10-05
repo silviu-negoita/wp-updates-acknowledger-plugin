@@ -1,11 +1,12 @@
 // Declare constants
-
 const overview_table_id = "wpua-table-element"
 const overview_table_id_selector = "#" + overview_table_id
 const category_expaned_class = "fa-folder-open-o"
 const category_collapsed_class = "fa-folder-o"
 
-
+/*
+* Entry point
+*/
 jQuery(document).ready(() => {
   jQuery("#" + WPUAConstants.WPUA_OVERVIEW_PAGE_CONTAINER_ID).ready(() => {
     let rootElement = jQuery("#" + WPUAConstants.WPUA_OVERVIEW_PAGE_CONTAINER_ID).get(0)
@@ -32,7 +33,7 @@ function remove_unused_dom_content() {
 }
 
 function get_overview_data(callback) {
-  make_server_request("GET", "/wp-json/wpua/api/getOverviewData", {}, callback)
+  make_server_request("GET", "get_overview_data", {}, callback)
 }
 
 /*
@@ -62,8 +63,7 @@ function render_overview_content(result) {
   table_wrapper.appendChild(create_overview_table(result));
   rootElement.appendChild(table_wrapper)
 
-  // now remove the sidebar and make the content wider
-
+  // after rendering part, 
   on_collapse_to_categoriesArticleClickEventHandler()
 
   // activate fixed header on table

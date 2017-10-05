@@ -97,7 +97,7 @@ function labelManage() {
     // retrieve the content of the article
     var textToSearch = jQuery('article').children('.entry-content')[0].innerHTML;
     
-    make_server_request("GET", "/wp-json/wpua/api/getArticleVersions", {}, function(response) {
+    make_server_request("GET", "get_article_versions", {}, function(response) {
 		// obtain versions as an array of arrays, e.g: [["v1.1.1", "2017-15-26"], ["v1.2.1", "2017-15-25"], ["v1.3.2", "2017-15-25"]]
 		// they come ordered from server
         versionsArray = response.restWidgetResultDataAllArticleVersionsField;

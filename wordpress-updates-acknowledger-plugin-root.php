@@ -1,21 +1,25 @@
 <?php
 /**
  * Plugin Name: Wordpress Updates Ancknowledger
- * Description: Manage the article viewers per each version; To render the 'Overview page', user shoud add an shortcode [overview_page]
-   Note: This plugin aggregates an existing plugin called "Js Dom Customizer"
+ * Description: Main plugin for custom wordpress functionalities: overview-page, overview-side-widget, include-html, dom-customizer, some other shortcodes etc.
  * Author: Silviu Negoita, Anca Barbu
  * Author URI: https://github.com/silviu-negoita
- * Version: 2.8.1
+ * Version: 3.1.1
  */
 
 include_once "wordpress-updates-acknowledger-common-utils.php";
+// load overview side widget
+include_once "wordpress-updates-acknowledger-overview-side-widget.php";
+// load overview content
 include_once "wordpress-updates-acknowledger-overview-content.php";
 // load old 'Js Dom Customizer' plugin
 include_once "wordpress-dom-customizer.php";
+// load all shortcodes defintion
 include_once "wordpress-updates-acknowledger-shortcodes.php";
 
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// PLUGIN PART
+// PLUGIN MAIN PART
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -23,6 +27,7 @@ include_once "wordpress-updates-acknowledger-shortcodes.php";
  */
 function register_constants($jsInit) {
   if (!defined('WPUA_CONTANTS_REGISTERED')) {
+    define('WPUA_API_ROUTE', 'wpua/api/');
     define('WPUA_CONTANTS_REGISTERED', true);
      // key to custom_field which records all acks
     define('WPUA_DATA_FIELD_KEY', "wpua_data_field");
@@ -54,6 +59,7 @@ function register_constants($jsInit) {
 ?> 
       <script>
           var WPUAConstants = {
+              WPUA_API_ROUTE : "<?php echo '/wp-json/' . WPUA_API_ROUTE ?>",
               WIDGET_BODY_ID: "<?php echo WIDGET_BODY_ID ?>",
               ARTICLE_PARAMETER_NAME: "<?php echo ARTICLE_PARAMETER_NAME ?>",
               ARTICLE_DATA_FIELD_VALUE : "<?php echo ARTICLE_DATA_FIELD_VALUE ?>",
@@ -68,24 +74,23 @@ function register_constants($jsInit) {
               REST_OVERVIEW_PAGE_RESULT_CATEGORIES_FIELD : "<?php echo REST_OVERVIEW_PAGE_RESULT_CATEGORIES_FIELD ?>",
               WPIH_CONTAINER_CLASS : "<?php echo WPIH_SCONTAINER_CLASS ?>",
               WPIH_SHORTCODE_PARAM_URL : "<?php echo WPIH_SHORTCODE_PARAM_URL ?>",
-              WPIH_SHORTCODE_PARAM_HTML_CONTENT : "<?php echo WPIH_SHORTCODE_PARAM_HTML_CONTENT ?>"
+              WPIH_SHORTCODE_PARAM_HTML_CONTENT : "<?php echo WPIH_SHORTCODE_PARAM_HTML_CONTENT ?>",
+              WPUA_PLUGIN_DIR_URL : "<?php echo plugin_dir_url(__FILE__) ?>"
           }
       </script>
       <?php
   }
 }
 
-
 function wpua_init() {
   // define PHP constants
   register_constants(true);
-
   // load all external deps
   loadStyleDependency('wpua-styles-css',  'css/wpua_styles.css');
   loadStyleDependency('wpua-font-awesome',  'css/font-awesome.css');
 
   loadJsDependency('wpua-common', 'js/wpua-common.js');
-  loadJsDependency('loadJsDependency', 'js/wpua-side-widget.js');
+  loadJsDependency('wpua-overview-side-widget', 'js/wpua-overview-side-widget.js');
   loadJsDependency('float-thead-js', 'js/float-thead.js');
   loadJsDependency('wpua-overview-widget', 'js/wpua-overview-content.js');
   loadJsDependency('wpih-main', 'js/wpih-main.js');
@@ -93,105 +98,51 @@ function wpua_init() {
 
 add_action('wp_enqueue_scripts', 'wpua_init');
 
+/*
+* Here are declare JS constants which will load when admin meniu shows up.
+*/
+function register_admin_menu_constants() {
+  ?>
+  <script>
+    var plugin_dir_url = "<?php echo plugin_dir_url(__FILE__) ?>"
+  </script>
+  <?php
+}
+
+add_filter("admin_menu", "register_admin_menu_constants");
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CONTROLLER PART
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function get_article_versions_internal($article_id) {
-  $all_versions_meta = get_single_post_meta($article_id, WPUA_ARTICLE_VERSIONS_KEY);
-  if (is_null($all_versions_meta)) {
-    return;
-  }
-  $all_versions = json_decode($all_versions_meta);
-  rsort($all_versions);
-  return $all_versions;
-}
 /**
- * Method called from JS to get data to render for article widget. It returns a data structure with following fields:
- *
- */
-function load_wpua_widget_data($request) {
-  $article_id = $_GET[ARTICLE_PARAMETER_NAME];
-  $logged_user = $_GET[LOGGED_USER_PARAMETER_NAME];
-  $result = array();
-
-  $result[REST_WIDGET_RESULT_DATA_ALL_USERS_FIELD] = get_all_users_with_custom_first($_GET[LOGGED_USER_PARAMETER_NAME]);
-  $articleDataFieldValue = get_post_meta($article_id, WPUA_DATA_FIELD_KEY, true);
-  if (empty($articleDataFieldValue) || is_null($articleDataFieldValue)) {
-    update_post_meta($article_id, WPUA_DATA_FIELD_KEY, array());
-  }
-  $result[REST_WIDGET_RESULT_DATA_RECORDED_ACKS_FIELD] = json_decode(get_single_post_meta($article_id, WPUA_DATA_FIELD_KEY));
-  $result[REST_WIDGET_RESULT_DATA_ALL_ARTICLE_VERSIONS_FIELD] = get_article_versions_internal($article_id);
-  return $result;
-}
-
-/*
-* Get all system users, with first element current logged user.
-*/
-function get_all_users_with_custom_first($logged_user) {
-   // set logged user first in result list
-  $all_users_except_current = get_users(array(
-    'fields' => array(
-      'display_name',
-      "ID"
-    ) ,
-    'exclude' => array(
-      $logged_user
-    )
-  ));
-  $current_users = get_users(array(
-    'fields' => array(
-      'display_name',
-      "ID"
-    ) ,
-    'include' => array(
-      $logged_user
-    )
-  ));
-  $all_users = array();
-  array_splice($all_users, 0, 0, $current_users);
-  array_splice($all_users, 1, 0, $all_users_except_current);
-
-  return $all_users;
-}
-
-/**
- * It updates the article custom field where all data is stored
- */
-function save_preferences($request) {
-  $article_id = $_POST[ARTICLE_PARAMETER_NAME];
-  $date_field_value = json_encode($_POST[ARTICLE_DATA_FIELD_VALUE]);
-  update_post_meta($article_id, WPUA_DATA_FIELD_KEY, $date_field_value);
-}
-
-/**
- * Register all rest routes(GET/POST)
+ * Register all rest routes(GET/POST). Notice that here we declare the routes which delegates to a mehtod implemented in each *.php file.
  */
 function register_api_routes() {
-  // define common constants
+  // redefine common constants, because here we enter from rest call, so different context from main plugin loading point.
   register_constants(false);
-  // responds to http://localhost/wp/wp-json/wpua/api/get_all_registered_users
-  register_rest_route('wpua/api/', '/load_wpua_widget_data', array(
+  // responds to http://hostname/wp/wp-json/wpua/api/get_all_registered_users
+  register_rest_route(WPUA_API_ROUTE, '/load_wpua_widget_data', array(
     'methods' => 'GET',
     'callback' => 'load_wpua_widget_data',
   ));
 
-  register_rest_route('wpua/api/', '/savePreferences', array(
+  register_rest_route(WPUA_API_ROUTE, '/save_preferences', array(
     'methods' => 'POST',
     'callback' => 'save_preferences',
   ));
 
-  register_rest_route('wpua/api/', '/getOverviewData', array(
+  register_rest_route(WPUA_API_ROUTE, '/get_overview_data', array(
     'methods' => 'GET',
-    'callback' => 'getOverviewData',
+    'callback' => 'get_overview_data',
   ));
 
-  register_rest_route('wpua/api/', '/getArticleVersions', array(
+  register_rest_route(WPUA_API_ROUTE, '/get_article_versions', array(
     'methods' => 'GET',
     'callback' => 'get_article_versions',
   ));
 
-  register_rest_route('wpua/api/', '/process_html_content', array(
+  register_rest_route(WPUA_API_ROUTE, '/process_html_content', array(
     'methods' => 'POST',
     'callback' => 'process_html_content',
   ));
@@ -200,80 +151,12 @@ function register_api_routes() {
 // register rest routes
 add_action('rest_api_init', "register_api_routes");
 
-
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// ARTICLE WIDGET PART
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/**
- * Widget for every article.
- */
-class wp_my_plugin extends WP_Widget {
-
-  // constructor
-  function __construct() {
-    parent::__construct(false, $name = __('Update Ancknowledger Widget', 'wp_widget_plugin'));
-
-
-  }
-
-  // widget form creation
-  function form($instance) {
-    // Check values
-    if ($instance) {
-      $title = esc_attr($instance['title']);
-    }
-    else {
-      $title = '';
-    }
-?>
-
-    <p>
-    <label for="<?php echo $this->get_field_id('title'); ?>"><?php _e(WPUA_WIDGET_TITLE, 'wp_widget_plugin'); ?></label>
-    <input class="widefat" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" type="text" value="<?php echo $title; ?>" />
-    </p>
-        <?php
-  }
-
-  // widget update
-  function update($new_instance, $old_instance) {
-    $instance = $old_instance;
-    // Fields
-    $instance['title'] = strip_tags($new_instance['title']);
-    return $instance;
-  }
-
-  // widget display
-  function widget($args, $instance) {
-    //extract($args);
-    // these are the widget options
-    $title = apply_filters('widget_title', $instance['title']);
-    if (is_null($title)) {
-      return;
-    }
-    echo $args['before_widget'];
-    // Display the widget
-?>
-    <div class="panel-heading"><?php echo $instance['title'] ?></div>
-    <div  id="<?php echo WIDGET_BODY_ID ?>"
-      <?php echo ARTICLE_PARAMETER_NAME ?> = "<?php echo get_the_ID() ?>" 
-      class="panel-body" style="overflow-x: auto;" >
-    </div>
-        <?php
-
-    echo $args['after_widget'];
-  }
-}
-
-// register widget
-add_action('widgets_init', create_function('', 'return register_widget("wp_my_plugin");'));
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//CUSTOM FIELDS  VALIDATOR PART
+// CUSTOM FIELDS  VALIDATOR PART
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /*
-* Hook that validates that a field is a json
+* Hook that validates that a field is a json e.g. wpua_article_versions, wpua_data_field which are used to store diffrent plugin data
 */
 function update_postmeta_hook($meta_id, $post_id, $meta_key, $meta_value) {
   log_me("Add or Update metda event triggered on key ". $meta_key);
@@ -289,9 +172,4 @@ function update_postmeta_hook($meta_id, $post_id, $meta_key, $meta_value) {
 }
 add_action( 'update_post_meta', 'update_postmeta_hook', 10, 4 );
 add_action( 'add_post_metadata', 'update_postmeta_hook', 10, 4 );
-
-function overview_widget_shortcode($attrs) {
-    return '<div id="wpua_overview_page_container_id"></div>';
-}
-add_shortcode('overview_page', 'overview_widget_shortcode');
 ?>
